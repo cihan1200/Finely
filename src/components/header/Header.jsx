@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { label: 'Features', href: '#features' },
   { label: 'Pricing', href: '#pricing' },
   { label: 'Reviews', href: '#reviews' },
+  { label: 'Dashboard (demo)', href: '/dashboard' },
 ];
 
 export default function Header() {
