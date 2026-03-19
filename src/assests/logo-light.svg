@@ -1,0 +1,7 @@
+<svg width="135" height="55" viewBox="0 0 135 55" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="55" height="55" rx="15" fill="#10b981"/>
+  <polyline points="10,38 22,22 33,30 45,13" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <polyline points="10,38 22,22 33,30 45,13" fill="none" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="45" cy="13" r="4" fill="white"/>
+  <text x="70" y="36" font-family="'IBM Plex Sans', sans-serif" font-size="26" font-weight="500" letter-spacing="-0.8" fill="#0f172a">finely</text>
+</svg>
