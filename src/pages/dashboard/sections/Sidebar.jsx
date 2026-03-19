@@ -23,11 +23,11 @@ const NAV_ITEMS = [
   { label: 'Transactions', icon: faArrowRightArrowLeft, href: '/transactions' },
   { label: 'Analytics', icon: faChartPie, href: '/analytics' },
   { label: 'Budgets', icon: faBullseye, href: '/budgets' },
-  { label: 'Export', icon: faFileExport, href: '/export' },
+  { label: 'Export', icon: faFileExport, href: '#' },
 ];
 
 const BOTTOM_ITEMS = [
-  { label: 'Settings', icon: faGear, href: '/settings' },
+  { label: 'Settings', icon: faGear, href: '#' },
 ];
 
 export default function Sidebar() {
