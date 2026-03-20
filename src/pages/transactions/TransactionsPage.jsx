@@ -1,42 +1,70 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import api from "../../utils/api";
+import { useNavigate } from 'react-router-dom';
 import styles from './TransactionsPage.module.css';
 import Sidebar from '../dashboard/sections/Sidebar';
 import TransactionsHeader from './sections/TransactionsHeader';
 import TransactionsSummary from './sections/TransactionsSummary';
 import TransactionsTable from './sections/TransactionsTable';
 import AddTransactionModal from '../../components/add_transaction/AddTransactionModal';
-
-const INITIAL_TRANSACTIONS = [
-  { id: 1, label: 'Salary deposit', category: 'Income', amount: 4200.00, sign: 'income', date: '2025-07-31' },
-  { id: 2, label: 'Netflix', category: 'Entertainment', amount: 15.99, sign: 'expense', date: '2025-07-29' },
-  { id: 3, label: 'Grocery Store', category: 'Food', amount: 63.40, sign: 'expense', date: '2025-07-28' },
-  { id: 4, label: 'Spotify', category: 'Entertainment', amount: 9.99, sign: 'expense', date: '2025-07-27' },
-  { id: 5, label: 'Electricity bill', category: 'Utilities', amount: 94.50, sign: 'expense', date: '2025-07-25' },
-  { id: 6, label: 'Freelance work', category: 'Income', amount: 850.00, sign: 'income', date: '2025-07-23' },
-  { id: 7, label: 'Uber', category: 'Transport', amount: 18.70, sign: 'expense', date: '2025-07-22' },
-  { id: 8, label: 'Gym membership', category: 'Health', amount: 40.00, sign: 'expense', date: '2025-07-20' },
-  { id: 9, label: 'Supermarket', category: 'Food', amount: 87.30, sign: 'expense', date: '2025-07-19' },
-  { id: 10, label: 'Dividends', category: 'Income', amount: 120.00, sign: 'income', date: '2025-07-15' },
-  { id: 11, label: 'Water bill', category: 'Utilities', amount: 32.00, sign: 'expense', date: '2025-07-14' },
-  { id: 12, label: 'Restaurant', category: 'Food', amount: 54.20, sign: 'expense', date: '2025-07-12' },
-  { id: 13, label: 'Online course', category: 'Education', amount: 29.99, sign: 'expense', date: '2025-07-10' },
-  { id: 14, label: 'Bus pass', category: 'Transport', amount: 45.00, sign: 'expense', date: '2025-07-08' },
-  { id: 15, label: 'Bonus payment', category: 'Income', amount: 500.00, sign: 'income', date: '2025-07-05' },
-];
+import ConfirmModal from '../../components/confirm_modal/ConfirmModal'; // <-- Import new modal
 
 export default function TransactionsPage() {
-  const [transactions, setTransactions] = useState(INITIAL_TRANSACTIONS);
+  const navigate = useNavigate();
+  const [transactions, setTransactions] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [transactionToDelete, setTransactionToDelete] = useState(null);
+  const [isDeletingId, setIsDeletingId] = useState(null);
 
-  const addTransaction = (tx) => {
-    setTransactions((prev) => [
-      { ...tx, id: Date.now() },
-      ...prev,
-    ]);
+  useEffect(() => {
+    if (!localStorage.getItem("token")) {
+      navigate('/signin');
+      return;
+    }
+
+    const fetchTransactions = async () => {
+      try {
+        const response = await api.get('/transaction');
+        setTransactions(response.data);
+      } catch (error) {
+        console.error('Error fetching transactions:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTransactions();
+  }, [navigate]);
+
+  const addTransaction = async (tx) => {
+    try {
+      const response = await api.post('/transaction', tx);
+      setTransactions((prev) => [response.data, ...prev]);
+      setModalOpen(false);
+    } catch (error) {
+      console.error('Error adding transaction:', error.response?.data || error.message);
+    }
   };
 
-  const deleteTransaction = (id) => {
-    setTransactions((prev) => prev.filter((tx) => tx.id !== id));
+  const requestDelete = (id) => {
+    setTransactionToDelete(id);
+  };
+
+  const confirmDelete = async () => {
+    const idToDelete = transactionToDelete;
+
+    setTransactionToDelete(null);
+    setIsDeletingId(idToDelete);
+
+    try {
+      await api.delete(`/transaction/${idToDelete}`);
+      setTransactions((prev) => prev.filter((tx) => tx.id !== idToDelete));
+    } catch (error) {
+      console.error('Error deleting transaction:', error);
+    } finally {
+      setIsDeletingId(null);
+    }
   };
 
   return (
@@ -45,19 +73,39 @@ export default function TransactionsPage() {
       <div className={styles.main}>
         <TransactionsHeader onAdd={() => setModalOpen(true)} />
         <div className={styles.content}>
-          <TransactionsSummary transactions={transactions} />
-          <TransactionsTable
-            transactions={transactions}
-            onDelete={deleteTransaction}
-          />
+          {isLoading ? (
+            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
+              Loading transactions...
+            </div>
+          ) : (
+            <>
+              <TransactionsSummary transactions={transactions} />
+              <TransactionsTable
+                transactions={transactions}
+                onDeleteRequest={requestDelete}
+                isDeletingId={isDeletingId}
+              />
+            </>
+          )}
         </div>
       </div>
+
       {modalOpen && (
         <AddTransactionModal
           onClose={() => setModalOpen(false)}
           onAdd={addTransaction}
         />
       )}
+
+      <ConfirmModal
+        isOpen={!!transactionToDelete}
+        onClose={() => setTransactionToDelete(null)}
+        onConfirm={confirmDelete}
+        title="Delete Transaction"
+        message="Are you sure you want to delete this transaction? It will be permanently removed from your history and budget calculations."
+        confirmText="Yes, Delete"
+        cancelText="Cancel"
+      />
     </div>
   );
 }

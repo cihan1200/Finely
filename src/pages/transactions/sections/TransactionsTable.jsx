@@ -12,43 +12,41 @@ import {
   faChevronUp,
   faChevronDown,
   faSort,
+  faSpinner
 } from '@fortawesome/free-solid-svg-icons';
 
-const CATEGORY_COLORS = {
-  Income: 'success',
-  Entertainment: 'primary',
-  Food: 'warning',
-  Utilities: 'info',
-  Transport: 'info',
-  Health: 'success',
-  Clothing: 'danger',
-  Education: 'primary',
-};
-
-const getCategoryColor = (cat) => CATEGORY_COLORS[cat] ?? 'neutral';
-
+const PAGE_SIZE = 10;
 const FILTERS = ['All', 'Income', 'Expense'];
-const PAGE_SIZE = 8;
 
 const SORT_FIELDS = {
-  date: (a, b) => new Date(b.date) - new Date(a.date),
   label: (a, b) => a.label.localeCompare(b.label),
-  amount: (a, b) => b.amount - a.amount,
   category: (a, b) => a.category.localeCompare(b.category),
+  date: (a, b) => new Date(a.date) - new Date(b.date),
+  amount: (a, b) => a.amount - b.amount,
 };
 
-const formatDate = (iso) => {
-  const d = new Date(iso);
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+const formatDate = (dateString) => {
+  const options = { year: 'numeric', month: 'short', day: 'numeric' };
+  return new Date(dateString).toLocaleDateString('en-US', options);
 };
 
-export default function TransactionsTable({ transactions, onDelete }) {
+const getCategoryColor = (category) => {
+  if (!category) return 'neutral';
+  const cat = category.toLowerCase();
+  if (cat === 'income') return 'success';
+  if (cat === 'food') return 'warning';
+  if (cat === 'utilities') return 'info';
+  if (cat === 'entertainment') return 'primary';
+  if (['transport', 'health'].includes(cat)) return 'danger';
+  return 'neutral';
+};
+
+export default function TransactionsTable({ transactions, onDeleteRequest, isDeletingId }) {
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('All');
   const [sortKey, setSortKey] = useState('date');
-  const [sortDir, setSortDir] = useState('asc');
+  const [sortDir, setSortDir] = useState('desc');
   const [page, setPage] = useState(0);
-  const [deletingId, setDeletingId] = useState(null);
 
   const handleSort = (key) => {
     if (sortKey === key) {
@@ -62,14 +60,6 @@ export default function TransactionsTable({ transactions, onDelete }) {
 
   const handleSearch = (e) => { setSearch(e.target.value); setPage(0); };
   const handleFilter = (f) => { setFilter(f); setPage(0); };
-
-  const handleDelete = (id) => {
-    setDeletingId(id);
-    setTimeout(() => {
-      onDelete(id);
-      setDeletingId(null);
-    }, 300);
-  };
 
   const filtered = useMemo(() => {
     let list = transactions.filter((tx) => {
@@ -168,44 +158,54 @@ export default function TransactionsTable({ transactions, onDelete }) {
                 </td>
               </tr>
             ) : (
-              visible.map((tx, i) => (
-                <tr
-                  key={tx.id}
-                  className={`${styles.row} ${deletingId === tx.id ? styles.rowDeleting : ''}`}
-                  style={{ animationDelay: `${i * 0.04}s` }}
-                >
-                  <td className={styles.td}>
-                    <div className={styles.txCell}>
-                      <span className={styles.txIcon} data-sign={tx.sign}>
-                        <FontAwesomeIcon icon={tx.sign === 'income' ? faArrowUp : faArrowDown} />
+              visible.map((tx, i) => {
+                const isDeleting = isDeletingId === tx.id;
+
+                return (
+                  <tr
+                    key={tx.id}
+                    className={`${styles.row} ${isDeleting ? styles.rowDeleting : ''}`}
+                    style={{ animationDelay: `${i * 0.04}s` }}
+                  >
+                    <td className={styles.td}>
+                      <div className={styles.txCell}>
+                        <span className={styles.txIcon} data-sign={tx.sign}>
+                          <FontAwesomeIcon icon={tx.sign === 'income' ? faArrowUp : faArrowDown} />
+                        </span>
+                        <span className={styles.txLabel}>{tx.label}</span>
+                      </div>
+                    </td>
+                    <td className={styles.td}>
+                      <span className={styles.category} data-color={getCategoryColor(tx.category)}>
+                        {tx.category}
                       </span>
-                      <span className={styles.txLabel}>{tx.label}</span>
-                    </div>
-                  </td>
-                  <td className={styles.td}>
-                    <span className={styles.category} data-color={getCategoryColor(tx.category)}>
-                      {tx.category}
-                    </span>
-                  </td>
-                  <td className={styles.td}>
-                    <span className={styles.date}>{formatDate(tx.date)}</span>
-                  </td>
-                  <td className={`${styles.td} ${styles.tdRight}`}>
-                    <span className={styles.amount} data-sign={tx.sign}>
-                      {tx.sign === 'income' ? '+' : '-'}${tx.amount.toFixed(2)}
-                    </span>
-                  </td>
-                  <td className={styles.td}>
-                    <button
-                      className={styles.deleteBtn}
-                      onClick={() => handleDelete(tx.id)}
-                      aria-label={`Delete ${tx.label}`}
-                    >
-                      <FontAwesomeIcon icon={faTrash} />
-                    </button>
-                  </td>
-                </tr>
-              ))
+                    </td>
+                    <td className={styles.td}>
+                      <span className={styles.date}>{formatDate(tx.date)}</span>
+                    </td>
+                    <td className={`${styles.td} ${styles.tdRight}`}>
+                      <span className={styles.amount} data-sign={tx.sign}>
+                        {tx.sign === 'income' ? '+' : '-'}${tx.amount.toFixed(2)}
+                      </span>
+                    </td>
+
+                    <td className={styles.td}>
+                      <button
+                        className={styles.deleteBtn}
+                        onClick={() => onDeleteRequest(tx.id)}
+                        disabled={isDeleting}
+                        aria-label={`Delete ${tx.label}`}
+                      >
+                        {isDeleting ? (
+                          <FontAwesomeIcon icon={faSpinner} spin />
+                        ) : (
+                          <FontAwesomeIcon icon={faTrash} />
+                        )}
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>

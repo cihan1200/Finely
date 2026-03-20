@@ -1,8 +1,9 @@
 import express from "express";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import authRoutes from "./routes/auth.js";
 import cors from "cors";
+import authRoutes from "./routes/authRoutes.js";
+import transactionRoutes from "./routes/transactionRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -21,6 +22,7 @@ async function connectDb() {
 connectDb();
 
 app.use("/auth", authRoutes);
+app.use("/transaction", transactionRoutes);
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);

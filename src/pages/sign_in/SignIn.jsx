@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import api from "../../utils/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 import styles from "./SignIn.module.css";
@@ -37,7 +37,7 @@ export default function SignIn() {
     setIsLoading(true);
 
     try {
-      const response = await axios.post("http://127.0.0.1:5000/auth/signin", {
+      const response = await api.post("/auth/signin", {
         email: formData.email,
         password: formData.password,
       });

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+import api from "../../utils/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 import styles from "./SignUp.module.css";
@@ -52,7 +52,7 @@ export default function SignUp() {
     const lastName = nameParts.slice(1).join(" ");
 
     try {
-      const response = await axios.post("http://127.0.0.1:5000/auth/signup", {
+      const response = await api.post("/auth/signup", {
         firstName,
         lastName,
         email: formData.email,
