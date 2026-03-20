@@ -6,21 +6,24 @@ import SpendingByCategory from './sections/SpendingByCategory';
 import MonthlyTrend from './sections/MonthlyTrend';
 import TopExpenses from './sections/TopExpenses';
 import IncomeVsExpenses from './sections/IncomeVsExpenses';
+import { useState } from 'react';
 
 export default function AnalyticsPage() {
+  const [period, setPeriod] = useState(6);
+
   return (
     <div className={styles.layout}>
       <Sidebar />
       <div className={styles.main}>
-        <AnalyticsHeader />
+        <AnalyticsHeader period={period} setPeriod={setPeriod} />
         <div className={styles.content}>
-          <AnalyticsSummary />
+          <AnalyticsSummary period={period} />
           <div className={styles.rowGrid}>
-            <SpendingByCategory />
-            <TopExpenses />
+            <SpendingByCategory period={period} />
+            <TopExpenses period={period} />
           </div>
-          <MonthlyTrend />
-          <IncomeVsExpenses />
+          <MonthlyTrend period={period} />
+          <IncomeVsExpenses period={period} />
         </div>
       </div>
     </div>

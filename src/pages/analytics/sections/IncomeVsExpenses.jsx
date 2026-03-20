@@ -1,23 +1,58 @@
+import { useState, useEffect } from 'react';
+import api from '../../../utils/api';
 import styles from './IncomeVsExpenses.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faScaleBalanced } from '@fortawesome/free-solid-svg-icons';
+import { faScaleBalanced, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+} from 'recharts';
 
-const DATA = [
-  { month: 'Feb', income: 4800, expenses: 2100 },
-  { month: 'Mar', income: 5200, expenses: 1950 },
-  { month: 'Apr', income: 4900, expenses: 2400 },
-  { month: 'May', income: 5800, expenses: 1800 },
-  { month: 'Jun', income: 5100, expenses: 2250 },
-  { month: 'Jul', income: 6200, expenses: 1840 },
-];
+// period is optional — when rendered from the Dashboard it will be undefined (defaults to 6)
+export default function IncomeVsExpenses({ period = 6 }) {
+  const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-const MAX = Math.max(...DATA.flatMap((d) => [d.income, d.expenses]));
-const fmt = (v) => `$${(v / 1000).toFixed(1)}k`;
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        const res = await api.get(`/analytic/monthly-trend?period=${period}`);
+        setData(res.data);
+      } catch (err) {
+        console.error('Failed to fetch income vs expenses data', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, [period]);
 
-export default function IncomeVsExpenses() {
-  const totalIncome = DATA.reduce((s, d) => s + d.income, 0);
-  const totalExpenses = DATA.reduce((s, d) => s + d.expenses, 0);
-  const ratio = ((totalExpenses / totalIncome) * 100).toFixed(1);
+  const totalIncome = data.reduce((s, d) => s + d.income, 0);
+  const totalExpenses = data.reduce((s, d) => s + d.expenses, 0);
+  const ratio = totalIncome > 0 ? ((totalExpenses / totalIncome) * 100).toFixed(1) : 0;
+
+  const formatPill = (v) => (v >= 1000 ? `$${(v / 1000).toFixed(1)}k` : `$${v.toLocaleString()}`);
+  const formatYAxis = (tick) => (tick >= 1000 ? `$${(tick / 1000).toFixed(0)}k` : `$${tick}`);
+
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className={styles.tooltip}>
+          <span className={styles.tooltipMonth}>{label}</span>
+          {payload.map((entry, i) => (
+            <div key={i} className={styles.tooltipRow}>
+              <span className={styles.tooltipDot} style={{ background: entry.fill }} />
+              <span className={styles.tooltipLabel}>{entry.name}</span>
+              <span className={styles.tooltipVal}>
+                ${entry.value.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+              </span>
+            </div>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <div className={styles.card}>
@@ -28,59 +63,51 @@ export default function IncomeVsExpenses() {
           </span>
           <h3 className={styles.cardTitle}>Income vs expenses</h3>
         </div>
-        <div className={styles.summaryPills}>
-          <span className={styles.pill} data-type="income">
-            Income ${(totalIncome / 1000).toFixed(1)}k
-          </span>
-          <span className={styles.pill} data-type="expenses">
-            Expenses ${(totalExpenses / 1000).toFixed(1)}k
-          </span>
-          <span className={styles.pill} data-type="ratio">
-            {ratio}% expense ratio
-          </span>
-        </div>
+
+        {!isLoading && (
+          <div className={styles.summaryPills}>
+            <span className={styles.pill} data-type="income">Income {formatPill(totalIncome)}</span>
+            <span className={styles.pill} data-type="expenses">Expenses {formatPill(totalExpenses)}</span>
+            <span className={styles.pill} data-type="ratio">{ratio}% expense ratio</span>
+          </div>
+        )}
       </div>
 
-      <div className={styles.chartArea}>
-        <div className={styles.yAxis}>
-          {[MAX, MAX * 0.75, MAX * 0.5, MAX * 0.25, 0].map((v, i) => (
-            <span key={i} className={styles.yLabel}>
-              {v === 0 ? '$0' : fmt(v)}
-            </span>
-          ))}
-        </div>
-
-        <div className={styles.bars}>
-          {DATA.map((d, i) => (
-            <div key={d.month} className={styles.barGroup} style={{ '--i': i }}>
-              <div className={styles.barPair}>
-                <div className={styles.barWrapper} title={`Income: $${d.income.toLocaleString()}`}>
-                  <div
-                    className={`${styles.bar} ${styles.barIncome}`}
-                    style={{ '--h': `${(d.income / MAX) * 100}%` }}
-                  />
-                </div>
-                <div className={styles.barWrapper} title={`Expenses: $${d.expenses.toLocaleString()}`}>
-                  <div
-                    className={`${styles.bar} ${styles.barExpenses}`}
-                    style={{ '--h': `${(d.expenses / MAX) * 100}%` }}
-                  />
-                </div>
-              </div>
-              <span className={styles.xLabel}>{d.month}</span>
-            </div>
-          ))}
-        </div>
+      <div className={styles.chartWrap}>
+        {isLoading ? (
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '240px', color: 'var(--text-secondary)' }}>
+            <FontAwesomeIcon icon={faSpinner} spin size="2x" />
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height={240}>
+            <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="var(--border)" />
+              <XAxis
+                dataKey="month"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: 'var(--text-secondary)', fontSize: 12, dy: 10 }}
+              />
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: 'var(--text-secondary)', fontSize: 12 }}
+                tickFormatter={formatYAxis}
+              />
+              <Tooltip content={<CustomTooltip />} cursor={{ fill: 'var(--bg-tertiary)', opacity: 0.5 }} />
+              <Bar dataKey="income" name="Income" fill="var(--color-success)" radius={[4, 4, 0, 0]} barSize={12} />
+              <Bar dataKey="expenses" name="Expenses" fill="var(--color-danger)" radius={[4, 4, 0, 0]} barSize={12} />
+            </BarChart>
+          </ResponsiveContainer>
+        )}
       </div>
 
       <div className={styles.legend}>
         <span className={styles.legendItem} data-type="income">
-          <span className={styles.legendDot} />
-          Income
+          <span className={styles.legendDot} />Income
         </span>
         <span className={styles.legendItem} data-type="expenses">
-          <span className={styles.legendDot} />
-          Expenses
+          <span className={styles.legendDot} />Expenses
         </span>
       </div>
     </div>

@@ -85,34 +85,11 @@
 }
 
 .chartWrap {
-  position: relative;
-}
-
-.svg {
   width: 100%;
-  height: auto;
-  display: block;
-  overflow: visible;
 }
 
-.linePath {
-  animation: drawLine 1s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-@keyframes drawLine {
-  from { stroke-dashoffset: 1000; stroke-dasharray: 1000; }
-  to   { stroke-dashoffset: 0;    stroke-dasharray: 1000; }
-}
-
-.axisLabel {
-  font-size: 9px;
-  fill: var(--text-secondary);
-  font-family: var(--font-sans);
-}
-
+/* Tooltip Styles for Recharts */
 .tooltip {
-  position: absolute;
-  top: 0;
   background-color: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -121,8 +98,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  pointer-events: none;
-  z-index: var(--z-raised);
   min-width: 130px;
 }
 

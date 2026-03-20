@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from './Transactions.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -9,20 +9,9 @@ import {
   faSliders,
   faChevronLeft,
   faChevronRight,
+  faSpinner,
 } from '@fortawesome/free-solid-svg-icons';
-
-const ALL_TRANSACTIONS = [
-  { id: 1, label: 'Salary deposit', category: 'Income', amount: 4200.00, sign: 'income', date: 'Jul 31, 2025' },
-  { id: 2, label: 'Netflix', category: 'Entertainment', amount: -15.99, sign: 'expense', date: 'Jul 29, 2025' },
-  { id: 3, label: 'Grocery Store', category: 'Food', amount: -63.40, sign: 'expense', date: 'Jul 28, 2025' },
-  { id: 4, label: 'Spotify', category: 'Entertainment', amount: -9.99, sign: 'expense', date: 'Jul 27, 2025' },
-  { id: 5, label: 'Electricity bill', category: 'Utilities', amount: -94.50, sign: 'expense', date: 'Jul 25, 2025' },
-  { id: 6, label: 'Freelance work', category: 'Income', amount: 850.00, sign: 'income', date: 'Jul 23, 2025' },
-  { id: 7, label: 'Uber', category: 'Transport', amount: -18.70, sign: 'expense', date: 'Jul 22, 2025' },
-  { id: 8, label: 'Gym membership', category: 'Health', amount: -40.00, sign: 'expense', date: 'Jul 20, 2025' },
-  { id: 9, label: 'Supermarket', category: 'Food', amount: -87.30, sign: 'expense', date: 'Jul 19, 2025' },
-  { id: 10, label: 'Dividends', category: 'Income', amount: 120.00, sign: 'income', date: 'Jul 15, 2025' },
-];
+import api from '../../../utils/api';
 
 const CATEGORY_COLORS = {
   Income: 'success',
@@ -32,22 +21,47 @@ const CATEGORY_COLORS = {
   Transport: 'info',
   Health: 'success',
   Clothing: 'danger',
+  Education: 'primary',
+  Subscriptions: 'warning',
+  Other: 'neutral',
 };
-
 const getCategoryColor = (category) => CATEGORY_COLORS[category] ?? 'neutral';
 
 const FILTERS = ['All', 'Income', 'Expense'];
 const PAGE_SIZE = 6;
 
+const formatDate = (dateStr) => {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+};
+
 export default function Transactions() {
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('All');
   const [page, setPage] = useState(0);
 
-  const filtered = ALL_TRANSACTIONS.filter((tx) => {
-    const matchSearch = tx.label.toLowerCase().includes(search.toLowerCase()) ||
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const res = await api.get('/transaction');
+        setTransactions(res.data);
+      } catch (err) {
+        console.error('Failed to fetch transactions', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTransactions();
+  }, []);
+
+  const filtered = transactions.filter((tx) => {
+    const matchSearch =
+      tx.label.toLowerCase().includes(search.toLowerCase()) ||
       tx.category.toLowerCase().includes(search.toLowerCase());
-    const matchFilter = filter === 'All' ||
+    const matchFilter =
+      filter === 'All' ||
       (filter === 'Income' && tx.sign === 'income') ||
       (filter === 'Expense' && tx.sign === 'expense');
     return matchSearch && matchFilter;
@@ -97,56 +111,62 @@ export default function Transactions() {
       </div>
 
       <div className={styles.tableWrapper}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th className={styles.th}>Transaction</th>
-              <th className={styles.th}>Category</th>
-              <th className={styles.th}>Date</th>
-              <th className={`${styles.th} ${styles.thRight}`}>Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            {visible.length === 0 ? (
+        {loading ? (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '2rem', color: 'var(--text-secondary)' }}>
+            <FontAwesomeIcon icon={faSpinner} spin size="2x" />
+          </div>
+        ) : (
+          <table className={styles.table}>
+            <thead>
               <tr>
-                <td colSpan={4} className={styles.empty}>No transactions found</td>
+                <th className={styles.th}>Transaction</th>
+                <th className={styles.th}>Category</th>
+                <th className={styles.th}>Date</th>
+                <th className={`${styles.th} ${styles.thRight}`}>Amount</th>
               </tr>
-            ) : (
-              visible.map((tx, i) => (
-                <tr
-                  key={tx.id}
-                  className={styles.row}
-                  style={{ animationDelay: `${i * 0.04}s` }}
-                >
-                  <td className={styles.td}>
-                    <div className={styles.txCell}>
-                      <span className={styles.txIcon} data-sign={tx.sign}>
-                        <FontAwesomeIcon icon={tx.sign === 'income' ? faArrowUp : faArrowDown} />
-                      </span>
-                      <span className={styles.txLabel}>{tx.label}</span>
-                    </div>
-                  </td>
-                  <td className={styles.td}>
-                    <span className={styles.category} data-color={getCategoryColor(tx.category)}>
-                      {tx.category}
-                    </span>
-                  </td>
-                  <td className={styles.td}>
-                    <span className={styles.date}>{tx.date}</span>
-                  </td>
-                  <td className={`${styles.td} ${styles.tdRight}`}>
-                    <span className={styles.amount} data-sign={tx.sign}>
-                      {tx.sign === 'income' ? '+' : ''}${Math.abs(tx.amount).toFixed(2)}
-                    </span>
-                  </td>
+            </thead>
+            <tbody>
+              {visible.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className={styles.empty}>No transactions found</td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                visible.map((tx, i) => (
+                  <tr
+                    key={tx.id}
+                    className={styles.row}
+                    style={{ animationDelay: `${i * 0.04}s` }}
+                  >
+                    <td className={styles.td}>
+                      <div className={styles.txCell}>
+                        <span className={styles.txIcon} data-sign={tx.sign}>
+                          <FontAwesomeIcon icon={tx.sign === 'income' ? faArrowUp : faArrowDown} />
+                        </span>
+                        <span className={styles.txLabel}>{tx.label}</span>
+                      </div>
+                    </td>
+                    <td className={styles.td}>
+                      <span className={styles.category} data-color={getCategoryColor(tx.category)}>
+                        {tx.category}
+                      </span>
+                    </td>
+                    <td className={styles.td}>
+                      <span className={styles.date}>{formatDate(tx.date)}</span>
+                    </td>
+                    <td className={`${styles.td} ${styles.tdRight}`}>
+                      <span className={styles.amount} data-sign={tx.sign}>
+                        {tx.sign === 'income' ? '+' : '-'}${Math.abs(tx.amount).toFixed(2)}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        )}
       </div>
 
-      {pages > 1 && (
+      {!loading && pages > 1 && (
         <div className={styles.pagination}>
           <span className={styles.pageInfo}>
             {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, filtered.length)} of {filtered.length}

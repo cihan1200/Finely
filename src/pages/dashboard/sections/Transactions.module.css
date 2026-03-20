@@ -74,7 +74,7 @@
   padding: 7px 12px 7px 30px;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  background-color: var(--bg-secondary);
+  background-color: var(--bg-tertiary);
   color: var(--text-primary);
   font-size: var(--text-sm);
   width: 180px;
@@ -95,7 +95,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-1);
-  background-color: var(--bg-secondary);
+  background-color: var(--bg-tertiary);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 3px;
@@ -126,7 +126,7 @@
 }
 
 .filterBtnActive {
-  background-color: var(--bg-elevated);
+  background-color: var(--bg-primary);
   color: var(--text-primary);
   font-weight: var(--weight-semibold);
   box-shadow: var(--shadow-xs);

@@ -6,17 +6,19 @@ import {
   faUtensils, faFilm, faCar, faBolt, faHeartPulse,
   faShirt, faBook, faRotate, faTag, faXmark,
 } from '@fortawesome/free-solid-svg-icons';
+import api from '../../utils/api';
 
+// label = display name, category = must match transaction category exactly
 const CATEGORY_OPTIONS = [
-  { label: 'Food & dining', value: 'Food & dining', icon: 'utensils', color: 'warning' },
-  { label: 'Entertainment', value: 'Entertainment', icon: 'film', color: 'primary' },
-  { label: 'Transport', value: 'Transport', icon: 'car', color: 'info' },
-  { label: 'Utilities', value: 'Utilities', icon: 'bolt', color: 'info' },
-  { label: 'Health', value: 'Health', icon: 'heart-pulse', color: 'success' },
-  { label: 'Clothing', value: 'Clothing', icon: 'shirt', color: 'danger' },
-  { label: 'Education', value: 'Education', icon: 'book', color: 'primary' },
-  { label: 'Subscriptions', value: 'Subscriptions', icon: 'rotate', color: 'warning' },
-  { label: 'Other', value: 'Other', icon: 'tag', color: 'primary' },
+  { label: 'Food & dining',  category: 'Food',          icon: 'utensils',    color: 'warning' },
+  { label: 'Entertainment',  category: 'Entertainment', icon: 'film',        color: 'primary' },
+  { label: 'Transport',      category: 'Transport',     icon: 'car',         color: 'info'    },
+  { label: 'Utilities',      category: 'Utilities',     icon: 'bolt',        color: 'info'    },
+  { label: 'Health',         category: 'Health',        icon: 'heart-pulse', color: 'success' },
+  { label: 'Clothing',       category: 'Clothing',      icon: 'shirt',       color: 'danger'  },
+  { label: 'Education',      category: 'Education',     icon: 'book',        color: 'primary' },
+  { label: 'Subscriptions',  category: 'Subscriptions', icon: 'rotate',      color: 'warning' },
+  { label: 'Other',          category: 'Other',         icon: 'tag',         color: 'primary' },
 ];
 
 const ICON_MAP = {
@@ -24,13 +26,14 @@ const ICON_MAP = {
   'heart-pulse': faHeartPulse, shirt: faShirt, book: faBook, rotate: faRotate, tag: faTag,
 };
 
-const EMPTY_FORM = { label: '', icon: 'tag', color: 'primary', limit: '' };
+const EMPTY_FORM = { label: '', category: '', icon: 'tag', color: 'primary', limit: '' };
 
-export default function AddBudgetModal({ onClose, onAdd }) {
+export default function AddBudgetModal({ onClose, onAdd, existingCategories = [] }) {
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
+  const [serverError, setServerError] = useState('');
 
   const close = () => {
     setIsClosing(true);
@@ -40,11 +43,13 @@ export default function AddBudgetModal({ onClose, onAdd }) {
   const set = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: undefined }));
+    setServerError('');
   };
 
   const selectCategory = (cat) => {
-    setForm((prev) => ({ ...prev, label: cat.label, icon: cat.icon, color: cat.color }));
+    setForm((prev) => ({ ...prev, label: cat.label, category: cat.category, icon: cat.icon, color: cat.color }));
     setErrors((prev) => ({ ...prev, label: undefined }));
+    setServerError('');
   };
 
   const validate = () => {
@@ -55,15 +60,27 @@ export default function AddBudgetModal({ onClose, onAdd }) {
     return e;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const e = validate();
     if (Object.keys(e).length) { setErrors(e); return; }
+
     setSaving(true);
-    setTimeout(() => {
-      onAdd({ label: form.label, icon: form.icon, color: form.color, limit: Number(Number(form.limit).toFixed(2)) });
-      setSaving(false);
+    try {
+      const res = await api.post('/budget', {
+        label: form.label,
+        category: form.category,
+        icon: form.icon,
+        color: form.color,
+        limit: Number(Number(form.limit).toFixed(2)),
+      });
+      onAdd(res.data);
       close();
-    }, 500);
+    } catch (err) {
+      const msg = err.response?.data?.message || 'Failed to create budget';
+      setServerError(msg);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleOverlayClick = (e) => {
@@ -84,17 +101,22 @@ export default function AddBudgetModal({ onClose, onAdd }) {
           <div className={styles.field}>
             <label className={styles.label}>Category</label>
             <div className={styles.categoryGrid}>
-              {CATEGORY_OPTIONS.map((cat) => (
-                <button
-                  key={cat.value}
-                  className={`${styles.catBtn} ${form.label === cat.label ? styles.catBtnActive : ''}`}
-                  onClick={() => selectCategory(cat)}
-                  data-color={cat.color}
-                >
-                  <FontAwesomeIcon icon={ICON_MAP[cat.icon]} />
-                  <span>{cat.label}</span>
-                </button>
-              ))}
+              {CATEGORY_OPTIONS.map((cat) => {
+                const alreadyExists = existingCategories.includes(cat.category);
+                return (
+                  <button
+                    key={cat.category}
+                    className={`${styles.catBtn} ${form.category === cat.category ? styles.catBtnActive : ''} ${alreadyExists ? styles.catBtnDisabled : ''}`}
+                    onClick={() => !alreadyExists && selectCategory(cat)}
+                    data-color={cat.color}
+                    disabled={alreadyExists}
+                    title={alreadyExists ? 'Budget already exists for this category' : ''}
+                  >
+                    <FontAwesomeIcon icon={ICON_MAP[cat.icon]} />
+                    <span>{cat.label}</span>
+                  </button>
+                );
+              })}
             </div>
             {errors.label && <span className={styles.error}>{errors.label}</span>}
           </div>
@@ -112,6 +134,8 @@ export default function AddBudgetModal({ onClose, onAdd }) {
             />
             {errors.limit && <span className={styles.error}>{errors.limit}</span>}
           </div>
+
+          {serverError && <span className={styles.error}>{serverError}</span>}
         </div>
 
         <div className={styles.modalFooter}>

@@ -1,36 +1,54 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import styles from './BudgetsPage.module.css';
 import Sidebar from '../dashboard/sections/Sidebar';
 import BudgetsHeader from './sections/BudgetsHeader';
 import BudgetsSummary from './sections/BudgetsSummary';
 import BudgetsList from './sections/BudgetsList';
 import AddBudgetModal from '../../components/add_budget/AddBudgetModal';
-
-const INITIAL_BUDGETS = [
-  { id: 1, label: 'Food & dining', icon: 'utensils', limit: 500, spent: 420, color: 'warning' },
-  { id: 2, label: 'Entertainment', icon: 'film', limit: 80, spent: 95, color: 'primary' },
-  { id: 3, label: 'Transport', icon: 'car', limit: 250, spent: 140, color: 'info' },
-  { id: 4, label: 'Utilities', icon: 'bolt', limit: 200, spent: 180, color: 'info' },
-  { id: 5, label: 'Health', icon: 'heart-pulse', limit: 150, spent: 60, color: 'success' },
-  { id: 6, label: 'Clothing', icon: 'shirt', limit: 200, spent: 210, color: 'danger' },
-  { id: 7, label: 'Education', icon: 'book', limit: 100, spent: 30, color: 'primary' },
-  { id: 8, label: 'Subscriptions', icon: 'rotate', limit: 50, spent: 26, color: 'warning' },
-];
+import api from '../../utils/api';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 
 export default function BudgetsPage() {
-  const [budgets, setBudgets] = useState(INITIAL_BUDGETS);
+  const [budgets, setBudgets] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
 
+  const fetchBudgets = async () => {
+    try {
+      const res = await api.get('/budget');
+      setBudgets(res.data);
+    } catch (err) {
+      console.error('Failed to fetch budgets', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBudgets();
+  }, []);
+
   const addBudget = (budget) => {
-    setBudgets((prev) => [...prev, { ...budget, id: Date.now(), spent: 0 }]);
+    setBudgets((prev) => [...prev, budget]);
   };
 
-  const deleteBudget = (id) => {
-    setBudgets((prev) => prev.filter((b) => b.id !== id));
+  const deleteBudget = async (id) => {
+    try {
+      await api.delete(`/budget/${id}`);
+      setBudgets((prev) => prev.filter((b) => b.id !== id));
+    } catch (err) {
+      console.error('Failed to delete budget', err);
+    }
   };
 
-  const updateLimit = (id, limit) => {
-    setBudgets((prev) => prev.map((b) => b.id === id ? { ...b, limit } : b));
+  const updateLimit = async (id, limit) => {
+    try {
+      await api.put(`/budget/${id}`, { limit });
+      setBudgets((prev) => prev.map((b) => b.id === id ? { ...b, limit } : b));
+    } catch (err) {
+      console.error('Failed to update budget limit', err);
+    }
   };
 
   return (
@@ -39,18 +57,27 @@ export default function BudgetsPage() {
       <div className={styles.main}>
         <BudgetsHeader onAdd={() => setModalOpen(true)} />
         <div className={styles.content}>
-          <BudgetsSummary budgets={budgets} />
-          <BudgetsList
-            budgets={budgets}
-            onDelete={deleteBudget}
-            onUpdateLimit={updateLimit}
-          />
+          {loading ? (
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem', color: 'var(--text-secondary)' }}>
+              <FontAwesomeIcon icon={faSpinner} spin size="2x" />
+            </div>
+          ) : (
+            <>
+              <BudgetsSummary budgets={budgets} />
+              <BudgetsList
+                budgets={budgets}
+                onDelete={deleteBudget}
+                onUpdateLimit={updateLimit}
+              />
+            </>
+          )}
         </div>
       </div>
       {modalOpen && (
         <AddBudgetModal
           onClose={() => setModalOpen(false)}
           onAdd={addBudget}
+          existingCategories={budgets.map((b) => b.category)}
         />
       )}
     </div>

@@ -5,7 +5,38 @@ import Transaction from "./models/Transaction.js";
 
 dotenv.config();
 
-const randomAmount = (min, max) => Number((Math.random() * (max - min) + min).toFixed(2));
+const randomAmount = (min, max) =>
+  Number((Math.random() * (max - min) + min).toFixed(2));
+
+const categories = [
+  "Food",
+  "Entertainment",
+  "Utilities",
+  "Transport",
+  "Health",
+  "Clothing",
+  "Education"
+];
+
+const expenseRanges = {
+  Food: [20, 150],
+  Entertainment: [10, 100],
+  Utilities: [50, 200],
+  Transport: [5, 50],
+  Health: [10, 120],
+  Clothing: [30, 200],
+  Education: [50, 300]
+};
+
+const expenseLabels = {
+  Food: ["Restaurant", "Grocery Store", "Cafe"],
+  Entertainment: ["Netflix", "Cinema", "Game"],
+  Utilities: ["Electricity Bill", "Water Bill", "Internet"],
+  Transport: ["Bus", "Taxi", "Fuel"],
+  Health: ["Pharmacy", "Doctor"],
+  Clothing: ["Online Shopping", "Mall"],
+  Education: ["Course", "Book"]
+};
 
 const seedDatabase = async () => {
   try {
@@ -14,37 +45,66 @@ const seedDatabase = async () => {
 
     const users = await User.find({});
     if (users.length === 0) {
-      console.log("No users found. Please sign up at least one user via the app first.");
+      console.log("No users found. Please sign up first.");
       process.exit(0);
     }
 
     await Transaction.deleteMany({});
     console.log("Cleared existing transactions.");
 
-    const categories = ["Income", "Entertainment", "Food", "Utilities", "Transport", "Health", "Clothing", "Education"];
-    const labels = ["Grocery Store", "Salary", "Netflix", "Electricity Bill", "Bus Ticket", "Pharmacy", "Online Shopping", "Course Subscription"];
-
     const transactionsData = [];
 
     users.forEach((user) => {
-      const numTransactions = Math.floor(Math.random() * 6) + 5;
+      const now = new Date();
 
-      for (let i = 0; i < numTransactions; i++) {
-        const isIncome = Math.random() > 0.7;
+      // Generate data for last 12 months
+      for (let i = 0; i < 12; i++) {
+        const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
+
+        // ✅ 1. Add salary (ALWAYS income)
+        const salaryAmount = randomAmount(2000, 4000);
 
         transactionsData.push({
           userId: user._id,
-          label: labels[Math.floor(Math.random() * labels.length)],
-          category: categories[Math.floor(Math.random() * categories.length)],
-          amount: randomAmount(10, 800),
-          sign: isIncome ? "income" : "expense",
-          date: new Date(Date.now() - Math.floor(Math.random() * 10000000000))
+          label: "Salary",
+          category: "Income",
+          amount: salaryAmount,
+          sign: "income",
+          date: new Date(monthDate.getFullYear(), monthDate.getMonth(), 5) // salary day
         });
+
+        // ✅ 2. Add random expenses (5–15 per month)
+        const numExpenses = Math.floor(Math.random() * 10) + 5;
+
+        for (let j = 0; j < numExpenses; j++) {
+          const category =
+            categories[Math.floor(Math.random() * categories.length)];
+
+          const [min, max] = expenseRanges[category];
+          const labelList = expenseLabels[category];
+
+          transactionsData.push({
+            userId: user._id,
+            label:
+              labelList[Math.floor(Math.random() * labelList.length)],
+            category,
+            amount: randomAmount(min, max),
+            sign: "expense",
+            date: new Date(
+              monthDate.getFullYear(),
+              monthDate.getMonth(),
+              Math.floor(Math.random() * 28) + 1 // random day
+            )
+          });
+        }
       }
     });
 
     await Transaction.insertMany(transactionsData);
-    console.log(`Successfully seeded ${transactionsData.length} transactions for ${users.length} users!`);
+
+    console.log(
+      `Seeded ${transactionsData.length} realistic transactions for ${users.length} users!`
+    );
 
     process.exit(0);
   } catch (error) {

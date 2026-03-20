@@ -99,7 +99,7 @@
 .filterBtn:hover { color: var(--text-primary); }
 
 .filterBtnActive {
-  background-color: var(--bg-elevated);
+  background-color: var(--bg-primary);
   color: var(--text-primary);
   font-weight: var(--weight-semibold);
   box-shadow: var(--shadow-xs);

@@ -2,13 +2,14 @@ import styles from './AnalyticsHeader.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarDays } from '@fortawesome/free-solid-svg-icons';
 
-const PERIODS = ['3 months', '6 months', '1 year'];
+// Using exact month numbers to easily pass to backend
+const PERIODS = [
+  { label: '3 months', value: 3 },
+  { label: '6 months', value: 6 },
+  { label: '1 year', value: 12 }
+];
 
-import { useState } from 'react';
-
-export default function AnalyticsHeader() {
-  const [period, setPeriod] = useState('6 months');
-
+export default function AnalyticsHeader({ period, setPeriod }) {
   return (
     <div className={styles.header}>
       <div className={styles.left}>
@@ -19,11 +20,11 @@ export default function AnalyticsHeader() {
         <FontAwesomeIcon icon={faCalendarDays} className={styles.calIcon} />
         {PERIODS.map((p) => (
           <button
-            key={p}
-            className={`${styles.periodBtn} ${period === p ? styles.periodBtnActive : ''}`}
-            onClick={() => setPeriod(p)}
+            key={p.value}
+            className={`${styles.periodBtn} ${period === p.value ? styles.periodBtnActive : ''}`}
+            onClick={() => setPeriod(p.value)}
           >
-            {p}
+            {p.label}
           </button>
         ))}
       </div>

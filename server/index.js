@@ -4,6 +4,8 @@ import mongoose from "mongoose";
 import cors from "cors";
 import authRoutes from "./routes/authRoutes.js";
 import transactionRoutes from "./routes/transactionRoutes.js";
+import analyticRoutes from "./routes/analyticRoutes.js";
+import budgetRoutes from "./routes/budgetRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -23,6 +25,8 @@ connectDb();
 
 app.use("/auth", authRoutes);
 app.use("/transaction", transactionRoutes);
+app.use("/analytic", analyticRoutes);
+app.use("/budget", budgetRoutes);
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);

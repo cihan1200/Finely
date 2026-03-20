@@ -7,7 +7,9 @@ import TransactionsHeader from './sections/TransactionsHeader';
 import TransactionsSummary from './sections/TransactionsSummary';
 import TransactionsTable from './sections/TransactionsTable';
 import AddTransactionModal from '../../components/add_transaction/AddTransactionModal';
-import ConfirmModal from '../../components/confirm_modal/ConfirmModal'; // <-- Import new modal
+import ConfirmModal from '../../components/confirm_modal/ConfirmModal';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 
 export default function TransactionsPage() {
   const navigate = useNavigate();
@@ -74,8 +76,9 @@ export default function TransactionsPage() {
         <TransactionsHeader onAdd={() => setModalOpen(true)} />
         <div className={styles.content}>
           {isLoading ? (
-            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-secondary)' }}>
-              Loading transactions...
+            <div className={styles.loadingContainer}>
+              <FontAwesomeIcon icon={faSpinner} spin className={styles.pageSpinner} />
+              <p>Loading your transactions...</p>
             </div>
           ) : (
             <>
