@@ -23,18 +23,18 @@ async function connectDb() {
 }
 connectDb();
 
+app.get("/health", (req, res) => {
+  const dbState = mongoose.connection.readyState;
+  if (dbState === 1) {
+    return res.status(200).json({ status: "ok", db: "connected" });
+  }
+  return res.status(503).json({ status: "starting", db: "connecting" });
+});
+
 app.use("/auth", authRoutes);
 app.use("/transaction", transactionRoutes);
 app.use("/analytic", analyticRoutes);
 app.use("/budget", budgetRoutes);
-
-app.get("/health", (_req, res) => {
-  res.status(200).json({
-    status: "UP",
-    timestamp: new Date().toISOString(),
-    dbStatus: mongoose.connection.readyState === 1 ? "Connected" : "Disconnected"
-  });
-});
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
