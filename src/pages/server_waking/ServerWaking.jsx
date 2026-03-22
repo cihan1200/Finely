@@ -1,5 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import styles from "./ServerWaking.module.css";
+import { useTheme } from "../../contexts/ThemeContext";
+import logoDark from "../../assests/logo-dark.svg";
+import logoLight from "../../assests/logo-light.svg";
 
 const PROD_API = "https://finely.onrender.com";
 const POLL_INTERVAL_MS = 3000;
@@ -11,6 +14,8 @@ const MAX_WAIT_MS = 90000; // 90 s — Render typically wakes in ~30–60 s
  * immediately (no polling needed since the server is already local).
  */
 export default function ServerWaking({ children }) {
+  const { theme } = useTheme();
+  const logo = theme === "dark" ? logoDark : logoLight;
   const isProd = !import.meta.env.DEV;
 
   const [status, setStatus] = useState(isProd ? "checking" : "ready");
@@ -78,12 +83,8 @@ export default function ServerWaking({ children }) {
   return (
     <div className={styles.overlay}>
       <div className={styles.card}>
-        {/* Logo mark */}
-        <div className={styles.logoMark}>
-          <span className={styles.logoIcon}>₣</span>
-        </div>
-
-        <h1 className={styles.appName}>Finely</h1>
+        {/* Theme-aware logo (includes the wordmark) */}
+        <img src={logo} alt="Finely" className={styles.logo} />
 
         {!isTimeout ? (
           <>

@@ -42,43 +42,9 @@
 
 /* ── Logo ───────────────────────────────────────────────────────────────────── */
 
-.logoMark {
-  width: 64px;
-  height: 64px;
-  border-radius: var(--radius-xl);
-  background: linear-gradient(
-    135deg,
-    var(--emerald-500, #10b981),
-    var(--emerald-700, #047857)
-  );
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.35);
-  animation: pulse 2.4s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { box-shadow: 0 4px 16px rgba(16, 185, 129, 0.35); }
-  50%       { box-shadow: 0 4px 28px rgba(16, 185, 129, 0.55); }
-}
-
-.logoIcon {
-  color: #fff;
-  font-size: 28px;
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: -0.5px;
-}
-
-/* ── App name ──────────────────────────────────────────────────────────────── */
-
-.appName {
-  margin: 0;
-  font-size: var(--text-2xl, 24px);
-  font-weight: var(--weight-bold, 700);
-  color: var(--text-primary);
-  letter-spacing: -0.5px;
+.logo {
+  height: 44px;
+  width: auto;
 }
 
 /* ── Spinner ───────────────────────────────────────────────────────────────── */
