@@ -6,8 +6,31 @@ import Dashboard from "./pages/dashboard/Dashboard";
 import TransactionsPage from './pages/transactions/TransactionsPage';
 import AnalyticsPage from "./pages/analytics/AnalyticsPage";
 import BudgetsPage from "./pages/budgets/BudgetsPage";
+import ServerWaking from "./pages/server_waking/ServerWaking";
 
 export default function App() {
+  const [isServerAwake, setIsServerAwake] = useState(false);
+
+  useEffect(() => {
+    const wakeUpServer = async () => {
+      try {
+        const response = await fetch("https://finely.onrender.com/ping");
+        if (response.ok) {
+          setIsServerAwake(true);
+        }
+      } catch (error) {
+        console.log("Server still sleeping, retrying...");
+        setTimeout(wakeUpServer, 3000);
+      }
+    };
+
+    wakeUpServer();
+  }, []);
+
+  if (!isServerAwake) {
+    return <ServerWaking />;
+  }
+
   return (
     <BrowserRouter>
       <Routes>
