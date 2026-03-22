@@ -30,12 +30,72 @@ const BOTTOM_ITEMS = [
   { label: 'Settings', icon: faGear, href: '#' },
 ];
 
+function parseJwt(token) {
+  try {
+    // 1. base64url → base64
+    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    // 2. Decode to a byte array and parse as UTF-8 (handles all Unicode)
+    const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+    return JSON.parse(new TextDecoder().decode(bytes));
+  } catch {
+    return {};
+  }
+}
+
+function getUser() {
+  // Preferred: explicit user object stored at sign-in
+  try {
+    const raw = localStorage.getItem('finely-user');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed.name || parsed.email) return parsed;
+    }
+  } catch {
+    // fall through
+  }
+
+  // Fallback: decode the JWT that is already in localStorage
+  try {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const { firstName, lastName, email } = parseJwt(token);
+      const name = [firstName, lastName].filter(Boolean).join(' ');
+      if (name || email) {
+        localStorage.setItem('finely-user', JSON.stringify({ name, email: email || '' }));
+      }
+      return { name, email: email || '' };
+    }
+  } catch {
+    // fall through
+  }
+
+  return { name: '', email: '' };
+}
+
+function getInitials(name = '') {
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? '')
+    .join('');
+}
+
+function logout() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('finely-user');
+  window.location.href = '/';
+}
+
 export default function Sidebar() {
   const { theme, toggleTheme } = useTheme();
   const [collapsed, setCollapsed] = useState(
     () => localStorage.getItem('finely-sidebar-collapsed') === 'true'
   );
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const user = getUser();
+  const initials = getInitials(user.name) || '?';
 
   const toggleCollapsed = () => {
     setCollapsed((v) => {
@@ -122,20 +182,32 @@ export default function Sidebar() {
 
           <div className={styles.divider} />
 
-          <div className={styles.userRow} data-tooltip="Alex Morgan">
-            <div className={styles.avatar}>AM</div>
+          <div className={styles.userRow} data-tooltip={user.name || 'Account'}>
+            <div className={styles.avatar}>{initials}</div>
             {!collapsed && (
               <div className={styles.userMeta}>
-                <span className={styles.userName}>Alex Morgan</span>
-                <span className={styles.userEmail}>alex@example.com</span>
+                <span className={styles.userName}>{user.name || 'Unknown user'}</span>
+                <span className={styles.userEmail}>{user.email || ''}</span>
               </div>
             )}
             {!collapsed && (
-              <button className={styles.logoutBtn}>
+              <button className={styles.logoutBtn} onClick={logout} aria-label="Log out">
                 <FontAwesomeIcon icon={faRightFromBracket} />
               </button>
             )}
           </div>
+
+          {collapsed && (
+            <button
+              className={styles.navItem}
+              onClick={logout}
+              data-tooltip="Log out"
+            >
+              <span className={`${styles.navIcon} ${styles.navIconDanger}`}>
+                <FontAwesomeIcon icon={faRightFromBracket} />
+              </span>
+            </button>
+          )}
         </div>
       </aside>
     </>

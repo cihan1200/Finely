@@ -4,13 +4,19 @@ import logoLight from '../../assests/logo-light.svg';
 import logoDark from '../../assests/logo-dark.svg';
 import { useTheme } from '../../contexts/ThemeContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSun, faMoon, faBars, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { faSun, faMoon, faBars, faXmark, faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
 
 const NAV_LINKS = [
   { label: 'Features', href: '#features' },
   { label: 'Pricing', href: '#pricing' },
   { label: 'Reviews', href: '#reviews' }
 ];
+
+function logout() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('finely-user');
+  window.location.href = '/';
+}
 
 export default function Header() {
   const { theme, toggleTheme } = useTheme();
@@ -61,7 +67,10 @@ export default function Header() {
 
         <div className={styles.ctas}>
           {isLoggedIn ? (
-            <a href="/dashboard" className={styles.ctaSignin}>Dashboard</a>
+            <button className={styles.ctaLogout} onClick={logout}>
+              <FontAwesomeIcon icon={faRightFromBracket} />
+              Log out
+            </button>
           ) : (
             <>
               <a href="/signin" className={styles.ctaLogin}>Log in</a>
@@ -123,9 +132,10 @@ export default function Header() {
           </nav>
           <div className={styles.mobileCtas}>
             {isLoggedIn ? (
-              <a href="/dashboard" className={styles.mobileCtaSignin} onClick={closeMenu}>
-                Dashboard
-              </a>
+              <button className={styles.mobileCtaLogout} onClick={logout}>
+                <FontAwesomeIcon icon={faRightFromBracket} />
+                Log out
+              </button>
             ) : (
               <>
                 <a href="/signin" className={styles.mobileCtaLogin} onClick={closeMenu}>

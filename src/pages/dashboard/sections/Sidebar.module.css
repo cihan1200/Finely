@@ -203,6 +203,15 @@
   font-size: 15px;
 }
 
+.navIconDanger {
+  color: var(--color-danger-text);
+}
+
+.navItem:has(.navIconDanger):hover {
+  background-color: var(--color-danger-light);
+  color: var(--color-danger-text);
+}
+
 .navLabel {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -315,7 +324,6 @@
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
- 
   transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
 }
 
