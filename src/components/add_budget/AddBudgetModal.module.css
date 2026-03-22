@@ -2,11 +2,12 @@
   position: fixed;
   inset: 0;
   background-color: var(--bg-overlay);
-  z-index: var(--z-modal);
+  z-index: 99999999;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: var(--space-4);
+  backdrop-filter: blur(4px);
   animation: overlayIn 0.2s ease both;
 }
 
@@ -125,7 +126,7 @@
   padding: 9px var(--space-3);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  background-color: var(--bg-secondary);
+  background-color: var(--bg-tertiary);
   color: var(--text-primary);
   font-size: var(--text-sm);
   outline: none;

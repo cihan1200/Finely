@@ -355,7 +355,7 @@
   --text-inverse:   #ffffff;
   --text-disabled:  var(--gray-300);
   --border:        var(--gray-200);
-  --border-strong: var(--gray-300);
+  --border-strong: #b5b5b5;
   --border-focus:  var(--emerald-500);
   --color-primary:        var(--emerald-500);
   --color-primary-hover:  var(--emerald-600);

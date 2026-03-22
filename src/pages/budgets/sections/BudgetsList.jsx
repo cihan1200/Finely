@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import styles from './BudgetsList.module.css';
+import ConfirmModal from "../../../components/confirm_modal/ConfirmModal";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUtensils, faFilm, faCar, faBolt, faHeartPulse,
@@ -22,10 +23,9 @@ const ICON_MAP = {
 
 const getIcon = (name) => ICON_MAP[name] ?? faTag;
 
-function BudgetCard({ budget, onDelete, onUpdateLimit }) {
+function BudgetCard({ budget, onDeleteRequest, onUpdateLimit, deleting }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(budget.limit.toString());
-  const [deleting, setDeleting] = useState(false);
 
   const pct = Math.min((budget.spent / budget.limit) * 100, 100);
   const over = budget.spent > budget.limit;
@@ -45,11 +45,6 @@ function BudgetCard({ budget, onDelete, onUpdateLimit }) {
   const cancelEdit = () => {
     setDraft(budget.limit.toString());
     setEditing(false);
-  };
-
-  const handleDelete = () => {
-    setDeleting(true);
-    setTimeout(() => onDelete(budget.id), 300);
   };
 
   const handleKeyDown = (e) => {
@@ -76,7 +71,7 @@ function BudgetCard({ budget, onDelete, onUpdateLimit }) {
           <button className={styles.actionBtn} onClick={() => setEditing(true)} aria-label="Edit limit">
             <FontAwesomeIcon icon={faPencil} />
           </button>
-          <button className={`${styles.actionBtn} ${styles.actionBtnDelete}`} onClick={handleDelete} aria-label="Delete budget">
+          <button className={`${styles.actionBtn} ${styles.actionBtnDelete}`} onClick={() => onDeleteRequest(budget)} aria-label="Delete budget">
             <FontAwesomeIcon icon={faTrash} />
           </button>
         </div>
@@ -145,52 +140,78 @@ function BudgetCard({ budget, onDelete, onUpdateLimit }) {
 }
 
 export default function BudgetsList({ budgets, onDelete, onUpdateLimit }) {
+  const [pendingDelete, setPendingDelete] = useState(null);
+
   const overBudgets = budgets.filter((b) => b.spent > b.limit);
   const okBudgets = budgets.filter((b) => b.spent <= b.limit);
 
+  const handleDeleteRequest = (budget) => setPendingDelete(budget);
+
+  const handleConfirmDelete = () => {
+    if (!pendingDelete) return;
+    onDelete(pendingDelete.id);
+    setPendingDelete(null);
+  };
+
+  const handleCancelDelete = () => setPendingDelete(null);
+
   return (
-    <div className={styles.wrapper}>
-      {overBudgets.length > 0 && (
+    <>
+      <div className={styles.wrapper}>
+        {overBudgets.length > 0 && (
+          <div className={styles.section}>
+            <div className={styles.sectionHeader}>
+              <span className={styles.sectionLabel} data-type="over">
+                <FontAwesomeIcon icon={faTriangleExclamation} />
+                Over budget ({overBudgets.length})
+              </span>
+            </div>
+            <div className={styles.grid}>
+              {overBudgets.map((b, i) => (
+                <div key={b.id} style={{ animationDelay: `${i * 0.07}s` }}>
+                  <BudgetCard
+                    budget={b}
+                    onDeleteRequest={handleDeleteRequest}
+                    onUpdateLimit={onUpdateLimit}
+                    deleting={pendingDelete?.id === b.id}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className={styles.section}>
           <div className={styles.sectionHeader}>
-            <span className={styles.sectionLabel} data-type="over">
-              <FontAwesomeIcon icon={faTriangleExclamation} />
-              Over budget ({overBudgets.length})
+            <span className={styles.sectionLabel} data-type="ok">
+              <FontAwesomeIcon icon={faCircleCheck} />
+              On track ({okBudgets.length})
             </span>
           </div>
           <div className={styles.grid}>
-            {overBudgets.map((b, i) => (
+            {okBudgets.map((b, i) => (
               <div key={b.id} style={{ animationDelay: `${i * 0.07}s` }}>
                 <BudgetCard
                   budget={b}
-                  onDelete={onDelete}
+                  onDeleteRequest={handleDeleteRequest}
                   onUpdateLimit={onUpdateLimit}
+                  deleting={pendingDelete?.id === b.id}
                 />
               </div>
             ))}
           </div>
         </div>
-      )}
-
-      <div className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <span className={styles.sectionLabel} data-type="ok">
-            <FontAwesomeIcon icon={faCircleCheck} />
-            On track ({okBudgets.length})
-          </span>
-        </div>
-        <div className={styles.grid}>
-          {okBudgets.map((b, i) => (
-            <div key={b.id} style={{ animationDelay: `${i * 0.07}s` }}>
-              <BudgetCard
-                budget={b}
-                onDelete={onDelete}
-                onUpdateLimit={onUpdateLimit}
-              />
-            </div>
-          ))}
-        </div>
       </div>
-    </div>
+
+      <ConfirmModal
+        isOpen={!!pendingDelete}
+        onClose={handleCancelDelete}
+        onConfirm={handleConfirmDelete}
+        title="Delete budget"
+        message={`Are you sure you want to delete the "${pendingDelete?.label}" budget? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+      />
+    </>
   );
 }

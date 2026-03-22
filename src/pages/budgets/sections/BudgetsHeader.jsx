@@ -3,7 +3,7 @@ import Button from '../../../components/button/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus } from '@fortawesome/free-solid-svg-icons';
 
-export default function BudgetsHeader({ onAdd }) {
+export default function BudgetsHeader({ onAdd, disableAdd }) {
   return (
     <div className={styles.header}>
       <div className={styles.left}>
@@ -16,6 +16,7 @@ export default function BudgetsHeader({ onAdd }) {
         icon={<FontAwesomeIcon icon={faPlus} />}
         iconPosition="left"
         onClick={onAdd}
+        disabled={disableAdd}
       >
         New budget
       </Button>

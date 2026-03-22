@@ -2,18 +2,19 @@
   position: fixed;
   inset: 0;
   background-color: var(--bg-overlay);
-  z-index: var(--z-modal);
+  z-index: 99999999;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: var(--space-4);
+  backdrop-filter: blur(4px);
   animation: overlayIn 0.2s ease both;
 }
 
-@keyframes overlayIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
+@keyframes overlayIn  { from { opacity: 0; } to { opacity: 1; } }
+
+.overlayOut { animation: overlayOut 0.22s ease both; }
+@keyframes overlayOut { from { opacity: 1; } to { opacity: 0; } }
 
 .modal {
   background-color: var(--bg-elevated);
@@ -29,23 +30,10 @@
   box-shadow: var(--shadow-xl);
 }
 
-.overlayOut {
-  animation: overlayOut 0.22s ease both;
-}
+@keyframes modalIn  { from { opacity: 0; transform: translateY(16px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
-@keyframes overlayOut {
-  from { opacity: 1; }
-  to   { opacity: 0; }
-}
-
-.modalOut {
-  animation: modalOut 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-@keyframes modalOut {
-  from { opacity: 1; transform: translateY(0) scale(1); }
-  to   { opacity: 0; transform: translateY(16px) scale(0.97); }
-}
+.modalOut { animation: modalOut 0.22s cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes modalOut { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(16px) scale(0.97); } }
 
 .modalHeader {
   display: flex;

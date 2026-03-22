@@ -42,14 +42,13 @@ export default function BudgetProgress() {
     fetchBudgets();
   }, []);
 
-  // Show top 6 budgets, prioritise over-budget ones first
   const sorted = [...budgets].sort((a, b) => {
     const aOver = a.spent > a.limit;
     const bOver = b.spent > b.limit;
     if (aOver && !bOver) return -1;
     if (!aOver && bOver) return 1;
     return b.spent / b.limit - a.spent / a.limit;
-  }).slice(0, 6);
+  });
 
   return (
     <div className={styles.card}>

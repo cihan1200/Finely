@@ -13,6 +13,8 @@ export default function BudgetsPage() {
   const [budgets, setBudgets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
+  const TOTAL_AVAILABLE_CATEGORIES = 9;
+  const allCategoriesUsed = budgets.length >= TOTAL_AVAILABLE_CATEGORIES;
 
   const fetchBudgets = async () => {
     try {
@@ -55,7 +57,7 @@ export default function BudgetsPage() {
     <div className={styles.layout}>
       <Sidebar />
       <div className={styles.main}>
-        <BudgetsHeader onAdd={() => setModalOpen(true)} />
+        <BudgetsHeader onAdd={() => setModalOpen(true)} disableAdd={allCategoriesUsed} />
         <div className={styles.content}>
           {loading ? (
             <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem', color: 'var(--text-secondary)' }}>
