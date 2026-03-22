@@ -31,6 +31,14 @@ app.get("/health", (req, res) => {
   return res.status(503).json({ status: "starting", db: "connecting" });
 });
 
+app.get("/wake", (_req, res) => {
+  const frontend = process.env.FRONTEND_URL;
+  if (!frontend) {
+    return res.status(500).send("FRONTEND_URL environment variable is not set.");
+  }
+  res.redirect(frontend);
+});
+
 app.use("/auth", authRoutes);
 app.use("/transaction", transactionRoutes);
 app.use("/analytic", analyticRoutes);
