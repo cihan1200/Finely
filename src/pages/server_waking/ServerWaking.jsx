@@ -1,4 +1,4 @@
-import styles from './RenderLoader.module.css';
+import styles from './ServerWaking.module.css';
 
 export default function ServerWaking() {
   return (
