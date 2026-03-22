@@ -23,7 +23,7 @@ async function connectDb() {
 }
 connectDb();
 
-app.get("/health", (req, res) => {
+app.get("/health", (_req, res) => {
   const dbState = mongoose.connection.readyState;
   if (dbState === 1) {
     return res.status(200).json({ status: "ok", db: "connected" });
@@ -31,12 +31,18 @@ app.get("/health", (req, res) => {
   return res.status(503).json({ status: "starting", db: "connecting" });
 });
 
-app.get("/wake", (_req, res) => {
-  const frontend = process.env.FRONTEND_URL;
-  if (!frontend) {
-    return res.status(500).send("FRONTEND_URL environment variable is not set.");
+app.get("/wake", (req, res) => {
+  const returnTo = req.query.return
+    ? decodeURIComponent(req.query.return)
+    : process.env.FRONTEND_URL;
+
+  if (!returnTo) {
+    return res.status(500).send(
+      "No return URL provided and FRONTEND_URL environment variable is not set."
+    );
   }
-  res.redirect(frontend);
+
+  res.redirect(returnTo);
 });
 
 app.use("/auth", authRoutes);
