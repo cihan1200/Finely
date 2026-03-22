@@ -1,9 +1,10 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5000',
+  baseURL: import.meta.env.DEV
+    ? 'http://localhost:5000'
+    : 'https://finely.onrender.com',
 });
-
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
