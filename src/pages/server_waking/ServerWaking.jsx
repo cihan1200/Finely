@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 import styles from './ServerWaking.module.css';
+import { useTheme } from '../../contexts/ThemeContext';
+import logoLight from "../../assests/logo-light.svg";
+import logoDark from "../../assests/logo-dark.svg";
 
 const STAGES = [
   { id: 'init', label: 'Initializing', detail: 'Starting up the runtime environment' },
@@ -9,6 +12,7 @@ const STAGES = [
 ];
 
 export default function ServerWaking({ onAwake }) {
+  const { theme } = useTheme();
   const [currentStage, setCurrentStage] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const [dots, setDots] = useState('');
@@ -38,10 +42,11 @@ export default function ServerWaking({ onAwake }) {
 
       <div className={styles.card}>
         <div className={styles.header}>
-          <div className={styles.logoMark}>
-            <span className={styles.logoIcon}>✦</span>
-          </div>
-          <span className={styles.appName}>Finely</span>
+          <img
+            src={theme === 'dark' ? logoDark : logoLight}
+            alt="Finely"
+            className={styles.logo}
+          />
         </div>
 
         <h1 className={styles.title}>Server is waking up{dots}</h1>
