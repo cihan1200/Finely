@@ -1,13 +1,16 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ThemeProvider } from './contexts/ThemeContext.jsx';
+import ServerStatusOverlay from './pages/health_check/ServerStatusOverlay.jsx';
 import './index.css';
 import App from './App.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ThemeProvider>
-      <App />
+      <ServerStatusOverlay>
+        <App />
+      </ServerStatusOverlay>
     </ThemeProvider>
   </StrictMode>
 );

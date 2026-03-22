@@ -5,6 +5,7 @@ const api = axios.create({
     ? 'http://localhost:5000'
     : 'https://finely.onrender.com',
 });
+
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');

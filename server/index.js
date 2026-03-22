@@ -28,6 +28,14 @@ app.use("/transaction", transactionRoutes);
 app.use("/analytic", analyticRoutes);
 app.use("/budget", budgetRoutes);
 
+app.get("/health", (_req, res) => {
+  res.status(200).json({
+    status: "UP",
+    timestamp: new Date().toISOString(),
+    dbStatus: mongoose.connection.readyState === 1 ? "Connected" : "Disconnected"
+  });
+});
+
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });
