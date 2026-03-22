@@ -8,7 +8,7 @@ const budgetSchema = new mongoose.Schema(
       required: true
     },
     label: { type: String, required: true },
-    category: { type: String, required: true }, // Matches transaction category exactly
+    category: { type: String, required: true },
     icon: { type: String, required: true },
     color: { type: String, required: true },
     limit: { type: Number, required: true }

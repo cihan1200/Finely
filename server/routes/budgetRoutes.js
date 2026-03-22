@@ -6,17 +6,14 @@ import mongoose from "mongoose";
 
 const router = express.Router();
 
-// GET /budget — all budgets for user, with current-month `spent` computed from transactions
 router.get("/", verifyToken, async (req, res) => {
   try {
     const budgets = await Budget.find({ userId: req.user.id });
 
-    // Current month window
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
-    // Aggregate expenses by category for current month
     const spentByCategory = await Transaction.aggregate([
       {
         $match: {
@@ -54,12 +51,10 @@ router.get("/", verifyToken, async (req, res) => {
   }
 });
 
-// POST /budget — create a new budget
 router.post("/", verifyToken, async (req, res) => {
   try {
     const { label, category, icon, color, limit } = req.body;
 
-    // Prevent duplicate categories per user
     const existing = await Budget.findOne({ userId: req.user.id, category });
     if (existing) {
       return res.status(409).json({ message: "Budget for this category already exists" });
@@ -82,7 +77,6 @@ router.post("/", verifyToken, async (req, res) => {
   }
 });
 
-// PUT /budget/:id — update limit
 router.put("/:id", verifyToken, async (req, res) => {
   try {
     const budget = await Budget.findById(req.params.id);
@@ -106,7 +100,6 @@ router.put("/:id", verifyToken, async (req, res) => {
   }
 });
 
-// DELETE /budget/:id
 router.delete("/:id", verifyToken, async (req, res) => {
   try {
     const budget = await Budget.findById(req.params.id);

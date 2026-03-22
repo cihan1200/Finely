@@ -15,7 +15,6 @@ import {
   faSpinner
 } from '@fortawesome/free-solid-svg-icons';
 
-// Map specific icons to specific backend categories
 const CATEGORY_META = {
   'Food': { icon: faUtensils, color: 'warning' },
   'Entertainment': { icon: faFilm, color: 'primary' },
@@ -38,14 +37,11 @@ export default function TopExpenses({ period }) {
       setIsLoading(true);
       try {
         const response = await api.get(`/analytic/expenses-by-category?period=${period}`);
-        // The backend already sorts this descending, so we map directly
         const formattedData = response.data.map(item => ({
           label: item.category,
           amount: item.amount,
           ...getCatMeta(item.category)
         }));
-
-        // Take only the top 6 categories if there are a lot
         setExpenses(formattedData.slice(0, 6));
       } catch (error) {
         console.error('Failed to fetch top expenses', error);

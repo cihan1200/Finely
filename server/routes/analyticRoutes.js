@@ -5,13 +5,11 @@ import mongoose from "mongoose";
 
 const router = express.Router();
 
-// GET analytics summary (Avg income, expenses, etc.)
+
 router.get("/summary", verifyToken, async (req, res) => {
   try {
-    // 1. Get period from query, default to 6 if not provided
     const period = parseInt(req.query.period) || 6;
 
-    // 2. Define dynamic time periods
     const now = new Date();
     const currentPeriodStart = new Date(now.getFullYear(), now.getMonth() - (period - 1), 1);
     const previousPeriodStart = new Date(now.getFullYear(), now.getMonth() - ((period * 2) - 1), 1);
@@ -37,8 +35,8 @@ router.get("/summary", verifyToken, async (req, res) => {
       const savingsRate = income > 0 ? (totalSaved / income) * 100 : 0;
 
       return {
-        avgIncome: income / period,       // Dynamically divide by period
-        avgExpenses: expenses / period,   // Dynamically divide by period
+        avgIncome: income / period,
+        avgExpenses: expenses / period,
         totalSaved: totalSaved,
         savingsRate: savingsRate
       };
@@ -69,14 +67,12 @@ router.get("/summary", verifyToken, async (req, res) => {
   }
 });
 
-// GET expenses grouped by category
 router.get("/expenses-by-category", verifyToken, async (req, res) => {
   try {
     const period = parseInt(req.query.period) || 6;
     const now = new Date();
     const currentPeriodStart = new Date(now.getFullYear(), now.getMonth() - (period - 1), 1);
 
-    // Apply the date filter so it doesn't fetch ALL expenses from all time
     const expenses = await Transaction.aggregate([
       {
         $match: {
@@ -109,14 +105,11 @@ router.get("/expenses-by-category", verifyToken, async (req, res) => {
   }
 });
 
-// GET monthly trend (Income, Expenses, Savings over dynamic period)
 router.get("/monthly-trend", verifyToken, async (req, res) => {
   try {
-    // 1. Get period from query, default to 6
     const period = parseInt(req.query.period) || 6;
     const now = new Date();
 
-    // Start of the month 'period - 1' months ago
     const periodStart = new Date(now.getFullYear(), now.getMonth() - (period - 1), 1);
 
     const transactions = await Transaction.find({
@@ -127,7 +120,6 @@ router.get("/monthly-trend", verifyToken, async (req, res) => {
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     const trendMap = new Map();
 
-    // 2. Initialize map with the correct number of dynamic months
     for (let i = period - 1; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const key = `${d.getFullYear()}-${d.getMonth()}`;
@@ -140,7 +132,6 @@ router.get("/monthly-trend", verifyToken, async (req, res) => {
       });
     }
 
-    // 3. Aggregate transaction amounts (FIXED with year + month key)
     transactions.forEach(tx => {
       const key = `${tx.date.getFullYear()}-${tx.date.getMonth()}`;
 
@@ -165,16 +156,13 @@ router.get("/monthly-trend", verifyToken, async (req, res) => {
   }
 });
 
-// GET /analytic/dashboard — current month overview + vs last month deltas + all-time balance
 router.get("/dashboard", verifyToken, async (req, res) => {
   try {
     const now = new Date();
 
-    // Current month window
     const currentStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const currentEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
-    // Previous month window
     const prevStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const prevEnd = currentStart;
 
@@ -197,7 +185,6 @@ router.get("/dashboard", verifyToken, async (req, res) => {
     const current = calcMonthStats(currentTxs);
     const prev = calcMonthStats(prevTxs);
 
-    // All-time balance
     let totalBalance = 0;
     allTransactions.forEach(tx => {
       if (tx.sign === "income") totalBalance += tx.amount;

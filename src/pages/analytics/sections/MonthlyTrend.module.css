@@ -88,7 +88,6 @@
   width: 100%;
 }
 
-/* Tooltip Styles for Recharts */
 .tooltip {
   background-color: var(--bg-elevated);
   border: 1px solid var(--border);

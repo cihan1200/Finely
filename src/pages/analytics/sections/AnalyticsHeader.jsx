@@ -2,7 +2,6 @@ import styles from './AnalyticsHeader.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCalendarDays } from '@fortawesome/free-solid-svg-icons';
 
-// Using exact month numbers to easily pass to backend
 const PERIODS = [
   { label: '3 months', value: 3 },
   { label: '6 months', value: 6 },

@@ -9,13 +9,14 @@ import { faSun, faMoon, faBars, faXmark } from '@fortawesome/free-solid-svg-icon
 const NAV_LINKS = [
   { label: 'Features', href: '#features' },
   { label: 'Pricing', href: '#pricing' },
-  { label: 'Reviews', href: '#reviews' },
-  { label: 'Dashboard (demo)', href: '/dashboard' },
+  { label: 'Reviews', href: '#reviews' }
 ];
 
 export default function Header() {
   const { theme, toggleTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const isLoggedIn = !!localStorage.getItem('token');
 
   const closeMenu = () => setMenuOpen(false);
 
@@ -51,11 +52,22 @@ export default function Header() {
               {link.label}
             </a>
           ))}
+          {isLoggedIn && (
+            <a href="/dashboard" className={styles.navLink}>
+              Dashboard
+            </a>
+          )}
         </nav>
 
         <div className={styles.ctas}>
-          <a href="/signin" className={styles.ctaLogin}>Log in</a>
-          <a href="/signup" className={styles.ctaSignin}>Get started</a>
+          {isLoggedIn ? (
+            <a href="/dashboard" className={styles.ctaSignin}>Dashboard</a>
+          ) : (
+            <>
+              <a href="/signin" className={styles.ctaLogin}>Log in</a>
+              <a href="/signup" className={styles.ctaSignin}>Get started</a>
+            </>
+          )}
 
           <button
             className={`${styles.themeSwitch} ${theme === 'dark' ? styles.active : ''}`}
@@ -103,14 +115,27 @@ export default function Header() {
                 {link.label}
               </a>
             ))}
+            {isLoggedIn && (
+              <a href="/dashboard" className={styles.mobileNavLink} onClick={closeMenu}>
+                Dashboard
+              </a>
+            )}
           </nav>
           <div className={styles.mobileCtas}>
-            <a href="/signin" className={styles.mobileCtaLogin} onClick={closeMenu}>
-              Log in
-            </a>
-            <a href="/signup" className={styles.mobileCtaSignin} onClick={closeMenu}>
-              Get started
-            </a>
+            {isLoggedIn ? (
+              <a href="/dashboard" className={styles.mobileCtaSignin} onClick={closeMenu}>
+                Dashboard
+              </a>
+            ) : (
+              <>
+                <a href="/signin" className={styles.mobileCtaLogin} onClick={closeMenu}>
+                  Log in
+                </a>
+                <a href="/signup" className={styles.mobileCtaSignin} onClick={closeMenu}>
+                  Get started
+                </a>
+              </>
+            )}
           </div>
         </div>
       )}

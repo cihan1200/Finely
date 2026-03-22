@@ -8,17 +8,16 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../../utils/api';
 
-// label = display name, category = must match transaction category exactly
 const CATEGORY_OPTIONS = [
-  { label: 'Food & dining',  category: 'Food',          icon: 'utensils',    color: 'warning' },
-  { label: 'Entertainment',  category: 'Entertainment', icon: 'film',        color: 'primary' },
-  { label: 'Transport',      category: 'Transport',     icon: 'car',         color: 'info'    },
-  { label: 'Utilities',      category: 'Utilities',     icon: 'bolt',        color: 'info'    },
-  { label: 'Health',         category: 'Health',        icon: 'heart-pulse', color: 'success' },
-  { label: 'Clothing',       category: 'Clothing',      icon: 'shirt',       color: 'danger'  },
-  { label: 'Education',      category: 'Education',     icon: 'book',        color: 'primary' },
-  { label: 'Subscriptions',  category: 'Subscriptions', icon: 'rotate',      color: 'warning' },
-  { label: 'Other',          category: 'Other',         icon: 'tag',         color: 'primary' },
+  { label: 'Food & dining', category: 'Food', icon: 'utensils', color: 'warning' },
+  { label: 'Entertainment', category: 'Entertainment', icon: 'film', color: 'primary' },
+  { label: 'Transport', category: 'Transport', icon: 'car', color: 'info' },
+  { label: 'Utilities', category: 'Utilities', icon: 'bolt', color: 'info' },
+  { label: 'Health', category: 'Health', icon: 'heart-pulse', color: 'success' },
+  { label: 'Clothing', category: 'Clothing', icon: 'shirt', color: 'danger' },
+  { label: 'Education', category: 'Education', icon: 'book', color: 'primary' },
+  { label: 'Subscriptions', category: 'Subscriptions', icon: 'rotate', color: 'warning' },
+  { label: 'Other', category: 'Other', icon: 'tag', color: 'primary' },
 ];
 
 const ICON_MAP = {

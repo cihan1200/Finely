@@ -26,7 +26,7 @@ export default function MonthlyTrend({ period }) {
 
   useEffect(() => {
     const fetchTrendData = async () => {
-      setIsLoading(true); // Trigger spinner when period changes
+      setIsLoading(true);
       try {
         const response = await api.get(`/analytic/monthly-trend?period=${period}`);
         setData(response.data);
@@ -38,12 +38,11 @@ export default function MonthlyTrend({ period }) {
     };
 
     fetchTrendData();
-  }, [period]); // Refetch when period changes
+  }, [period]);
 
   const toggleLine = (key) =>
     setActiveLines((prev) => ({ ...prev, [key]: !prev[key] }));
 
-  // Custom Tooltip component to match your original styling
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (

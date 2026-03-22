@@ -8,15 +8,21 @@ import TransactionsPage from './pages/transactions/TransactionsPage';
 import AnalyticsPage from "./pages/analytics/AnalyticsPage";
 import BudgetsPage from "./pages/budgets/BudgetsPage";
 import ServerWaking from "./pages/server_waking/ServerWaking";
+import ProtectedRoute from "./components/protected_rote/ProtectedRoute";
 
 export default function App() {
-  const [isServerAwake, setIsServerAwake] = useState(false);
+  const [isServerAwake, setIsServerAwake] = useState(
+    () => sessionStorage.getItem("serverAwake") === "true"
+  );
 
   useEffect(() => {
+    if (isServerAwake) return;
+
     const wakeUpServer = async () => {
       try {
         const response = await fetch("https://finely.onrender.com/ping");
         if (response.ok) {
+          sessionStorage.setItem("serverAwake", "true");
           setIsServerAwake(true);
         }
       } catch (error) {
@@ -38,10 +44,12 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/transactions" element={<TransactionsPage />} />
-        <Route path="/analytics" element={<AnalyticsPage />} />
-        <Route path="/budgets" element={<BudgetsPage />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/transactions" element={<TransactionsPage />} />
+          <Route path="/analytics" element={<AnalyticsPage />} />
+          <Route path="/budgets" element={<BudgetsPage />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   );

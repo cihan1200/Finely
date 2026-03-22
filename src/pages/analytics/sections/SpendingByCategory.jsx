@@ -4,7 +4,6 @@ import styles from './SpendingByCategory.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChartPie, faSpinner } from '@fortawesome/free-solid-svg-icons';
 
-// Map colors to your specific backend categories
 const CATEGORY_STYLES = {
   'Food': { color: 'var(--color-warning)', bg: 'var(--color-warning-light)', text: 'var(--color-warning-text)' },
   'Entertainment': { color: 'var(--color-primary)', bg: 'var(--color-primary-light)', text: 'var(--color-primary-text)' },
@@ -16,7 +15,6 @@ const CATEGORY_STYLES = {
   'Other': { color: 'var(--color-danger)', bg: 'var(--color-danger-light)', text: 'var(--color-danger-text)' },
 };
 
-// Fallback style if a new category is ever added
 const getCatStyle = (cat) => CATEGORY_STYLES[cat] || { color: 'var(--color-info)', bg: 'var(--color-info-light)', text: 'var(--color-info-text)' };
 
 const r = 56;
@@ -35,7 +33,6 @@ export default function SpendingByCategory({ period }) {
       setIsLoading(true);
       try {
         const response = await api.get(`/analytic/expenses-by-category?period=${period}`);
-        // Map backend data to frontend structure
         const formattedData = response.data.map(item => ({
           label: item.category,
           amount: item.amount,
@@ -53,7 +50,6 @@ export default function SpendingByCategory({ period }) {
 
   const total = categories.reduce((s, c) => s + c.amount, 0);
 
-  // Dynamically build SVG segments based on fetched data
   const buildSegments = () => {
     let offset = 0;
     return categories.map((cat) => {

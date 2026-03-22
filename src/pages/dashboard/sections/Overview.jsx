@@ -46,44 +46,43 @@ export default function Overview() {
 
   const CARDS = data
     ? [
-        {
-          label: 'Total balance',
-          value: fmt(data.totalBalance),
-          change: fmtPct(data.balanceDelta),
-          changeLabel: 'vs last month',
-          positive: isPos(data.balanceDelta),
-          icon: faWallet,
-          color: 'primary',
-        },
-        {
-          label: 'Total income',
-          value: fmt(data.currentMonthIncome),
-          change: fmtPct(data.incomeDelta),
-          changeLabel: 'vs last month',
-          positive: isPos(data.incomeDelta),
-          icon: faArrowTrendUp,
-          color: 'success',
-        },
-        {
-          label: 'Total expenses',
-          value: fmt(data.currentMonthExpenses),
-          change: fmtPct(data.expensesDelta),
-          changeLabel: 'vs last month',
-          // For expenses, lower is better
-          positive: !isPos(data.expensesDelta),
-          icon: faArrowTrendDown,
-          color: 'danger',
-        },
-        {
-          label: 'Savings rate',
-          value: `${(data.currentMonthSavingsRate ?? 0).toFixed(1)}%`,
-          change: fmtPct(data.savingsRateDelta),
-          changeLabel: 'vs last month',
-          positive: isPos(data.savingsRateDelta),
-          icon: faCircleHalfStroke,
-          color: 'info',
-        },
-      ]
+      {
+        label: 'Total balance',
+        value: fmt(data.totalBalance),
+        change: fmtPct(data.balanceDelta),
+        changeLabel: 'vs last month',
+        positive: isPos(data.balanceDelta),
+        icon: faWallet,
+        color: 'primary',
+      },
+      {
+        label: 'Total income',
+        value: fmt(data.currentMonthIncome),
+        change: fmtPct(data.incomeDelta),
+        changeLabel: 'vs last month',
+        positive: isPos(data.incomeDelta),
+        icon: faArrowTrendUp,
+        color: 'success',
+      },
+      {
+        label: 'Total expenses',
+        value: fmt(data.currentMonthExpenses),
+        change: fmtPct(data.expensesDelta),
+        changeLabel: 'vs last month',
+        positive: !isPos(data.expensesDelta),
+        icon: faArrowTrendDown,
+        color: 'danger',
+      },
+      {
+        label: 'Savings rate',
+        value: `${(data.currentMonthSavingsRate ?? 0).toFixed(1)}%`,
+        change: fmtPct(data.savingsRateDelta),
+        changeLabel: 'vs last month',
+        positive: isPos(data.savingsRateDelta),
+        icon: faCircleHalfStroke,
+        color: 'info',
+      },
+    ]
     : [];
 
   return (

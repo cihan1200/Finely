@@ -7,7 +7,6 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
 
-// period is optional — when rendered from the Dashboard it will be undefined (defaults to 6)
 export default function IncomeVsExpenses({ period = 6 }) {
   const [data, setData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);

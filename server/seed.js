@@ -57,11 +57,9 @@ const seedDatabase = async () => {
     users.forEach((user) => {
       const now = new Date();
 
-      // Generate data for last 12 months
       for (let i = 0; i < 12; i++) {
         const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
 
-        // ✅ 1. Add salary (ALWAYS income)
         const salaryAmount = randomAmount(2000, 4000);
 
         transactionsData.push({
@@ -70,10 +68,9 @@ const seedDatabase = async () => {
           category: "Income",
           amount: salaryAmount,
           sign: "income",
-          date: new Date(monthDate.getFullYear(), monthDate.getMonth(), 5) // salary day
+          date: new Date(monthDate.getFullYear(), monthDate.getMonth(), 5)
         });
 
-        // ✅ 2. Add random expenses (5–15 per month)
         const numExpenses = Math.floor(Math.random() * 10) + 5;
 
         for (let j = 0; j < numExpenses; j++) {

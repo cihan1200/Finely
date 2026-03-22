@@ -97,7 +97,6 @@
   border-radius: 2px;
 }
 
-/* Tooltip Styles for Recharts */
 .tooltip {
   background-color: var(--bg-elevated);
   border: 1px solid var(--border);
