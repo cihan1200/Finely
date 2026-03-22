@@ -6,6 +6,7 @@ import authRoutes from "./routes/authRoutes.js";
 import transactionRoutes from "./routes/transactionRoutes.js";
 import analyticRoutes from "./routes/analyticRoutes.js";
 import budgetRoutes from "./routes/budgetRoutes.js";
+import exportRoutes from "./routes/exportRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -31,6 +32,7 @@ app.use("/auth", authRoutes);
 app.use("/transaction", transactionRoutes);
 app.use("/analytic", analyticRoutes);
 app.use("/budget", budgetRoutes);
+app.use("/export", exportRoutes);
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);

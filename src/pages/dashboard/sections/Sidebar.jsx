@@ -23,7 +23,7 @@ const NAV_ITEMS = [
   { label: 'Transactions', icon: faArrowRightArrowLeft, href: '/transactions' },
   { label: 'Analytics', icon: faChartPie, href: '/analytics' },
   { label: 'Budgets', icon: faBullseye, href: '/budgets' },
-  { label: 'Export', icon: faFileExport, href: '#' },
+  { label: 'Export', icon: faFileExport, href: '/exports' },
 ];
 
 const BOTTOM_ITEMS = [

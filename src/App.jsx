@@ -9,6 +9,7 @@ import AnalyticsPage from "./pages/analytics/AnalyticsPage";
 import BudgetsPage from "./pages/budgets/BudgetsPage";
 import ServerWaking from "./pages/server_waking/ServerWaking";
 import ProtectedRoute from "./components/protected_rote/ProtectedRoute";
+import ExportPage from "./pages/exports/ExportPage";
 
 export default function App() {
   const [isServerAwake, setIsServerAwake] = useState(
@@ -49,6 +50,7 @@ export default function App() {
           <Route path="/transactions" element={<TransactionsPage />} />
           <Route path="/analytics" element={<AnalyticsPage />} />
           <Route path="/budgets" element={<BudgetsPage />} />
+          <Route path="/exports" element={<ExportPage />} />
         </Route>
       </Routes>
     </BrowserRouter>
