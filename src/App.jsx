@@ -10,6 +10,7 @@ import BudgetsPage from "./pages/budgets/BudgetsPage";
 import ServerWaking from "./pages/server_waking/ServerWaking";
 import ProtectedRoute from "./components/protected_rote/ProtectedRoute";
 import ExportPage from "./pages/exports/ExportPage";
+import AIAssistant from "./components/ai_assistant/AIAssistant";
 
 export default function App() {
   const [isServerAwake, setIsServerAwake] = useState(
@@ -41,6 +42,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
+      <AIAssistant />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/signin" element={<SignIn />} />

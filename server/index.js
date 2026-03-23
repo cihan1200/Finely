@@ -7,6 +7,7 @@ import transactionRoutes from "./routes/transactionRoutes.js";
 import analyticRoutes from "./routes/analyticRoutes.js";
 import budgetRoutes from "./routes/budgetRoutes.js";
 import exportRoutes from "./routes/exportRoutes.js";
+import aiRoutes from "./routes/aiRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -24,7 +25,7 @@ async function connectDb() {
 }
 connectDb();
 
-app.get("/ping", (req, res) => {
+app.get("/ping", (_req, res) => {
   res.status(200).json({ status: "online" });
 });
 
@@ -33,6 +34,7 @@ app.use("/transaction", transactionRoutes);
 app.use("/analytic", analyticRoutes);
 app.use("/budget", budgetRoutes);
 app.use("/export", exportRoutes);
+app.use("/ai", aiRoutes);
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
