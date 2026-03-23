@@ -142,7 +142,7 @@
 @media (max-width: 480px) {
   .chartArea {
     flex-direction: column;
-    align-items: center; /* Centers the donut */
+    align-items: center;
     gap: var(--space-4);
   }
   

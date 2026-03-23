@@ -11,8 +11,6 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Header ───────────────────────────────── */
-
 .cardHeader {
   display: flex;
   align-items: center;
@@ -203,8 +201,6 @@
 
 .clearBtn:hover { opacity: 0.8; }
 
-/* ── Empty state ──────────────────────────── */
-
 .empty {
   display: flex;
   flex-direction: column;
@@ -226,8 +222,6 @@
   max-width: 220px;
   margin: 0;
 }
-
-/* ── List ─────────────────────────────────── */
 
 .list {
   list-style: none;
@@ -331,8 +325,6 @@
   flex-shrink: 0;
   font-family: var(--font-mono);
 }
-
-/* ── Pagination ───────────────────────────── */
 
 .pagination {
   display: flex;

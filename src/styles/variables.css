@@ -1,8 +1,4 @@
 :root {
-
-  /* ── Raw Palette ─────────────────────────── */
-
-  /* Emerald — primary brand color (growth, money) */
   --emerald-50:  #ecfdf5;
   --emerald-100: #d1fae5;
   --emerald-200: #a7f3d0;
@@ -14,7 +10,6 @@
   --emerald-800: #065f46;
   --emerald-900: #064e3b;
 
-  /* Red — danger / expenses */
   --red-50:  #fef2f2;
   --red-100: #fee2e2;
   --red-200: #fecaca;
@@ -25,7 +20,6 @@
   --red-700: #b91c1c;
   --red-800: #991b1b;
 
-  /* Amber — warnings / budget alerts */
   --amber-50:  #fffbeb;
   --amber-100: #fef3c7;
   --amber-200: #fde68a;
@@ -35,7 +29,6 @@
   --amber-700: #b45309;
   --amber-800: #92400e;
 
-  /* Blue — info / neutral accent */
   --blue-50:  #eff6ff;
   --blue-100: #dbeafe;
   --blue-200: #bfdbfe;
@@ -45,7 +38,6 @@
   --blue-700: #1d4ed8;
   --blue-800: #1e40af;
 
-  /* Gray — neutrals */
   --gray-50:  #f9fafb;
   --gray-100: #f3f4f6;
   --gray-200: #e5e7eb;
@@ -58,29 +50,22 @@
   --gray-900: #111827;
   --gray-950: #030712;
 
-
-  /* ── Semantic Tokens — Light Mode ─────────── */
-
-  /* Surfaces */
   --bg-primary:    #ffffff;
   --bg-secondary:  var(--gray-50);
   --bg-tertiary:   var(--gray-100);
   --bg-elevated:   #ffffff;
   --bg-overlay:    rgba(0, 0, 0, 0.4);
 
-  /* Text */
   --text-primary:   var(--gray-900);
   --text-secondary: var(--gray-600);
   --text-muted:     var(--gray-400);
   --text-inverse:   #ffffff;
   --text-disabled:  var(--gray-300);
 
-  /* Borders */
   --border:        var(--gray-200);
   --border-strong: var(--gray-300);
   --border-focus:  var(--emerald-500);
 
-  /* Brand / Primary */
   --color-primary:        var(--emerald-500);
   --color-primary-hover:  var(--emerald-600);
   --color-primary-active: var(--emerald-700);
@@ -88,14 +73,12 @@
   --color-primary-border: var(--emerald-200);
   --color-primary-text:   var(--emerald-700);
 
-  /* Success (income) */
   --color-success:        var(--emerald-500);
   --color-success-hover:  var(--emerald-600);
   --color-success-light:  var(--emerald-50);
   --color-success-border: var(--emerald-200);
   --color-success-text:   var(--emerald-700);
 
-  /* Danger (expenses / errors) */
   --color-danger:        var(--red-500);
   --color-danger-hover:  var(--red-600);
   --color-danger-active: var(--red-700);
@@ -103,31 +86,23 @@
   --color-danger-border: var(--red-200);
   --color-danger-text:   var(--red-700);
 
-  /* Warning (budget alerts) */
   --color-warning:        var(--amber-500);
   --color-warning-hover:  var(--amber-600);
   --color-warning-light:  var(--amber-50);
   --color-warning-border: var(--amber-200);
   --color-warning-text:   var(--amber-700);
 
-  /* Info */
   --color-info:        var(--blue-500);
   --color-info-hover:  var(--blue-600);
   --color-info-light:  var(--blue-50);
   --color-info-border: var(--blue-200);
   --color-info-text:   var(--blue-700);
 
-
-  /* ── Shadows ─────────────────────────────── */
-
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
-
-
-  /* ── Border Radius ───────────────────────── */
 
   --radius-xs:   2px;
   --radius-sm:   4px;
@@ -136,9 +111,6 @@
   --radius-xl:   16px;
   --radius-2xl:  24px;
   --radius-full: 9999px;
-
-
-  /* ── Spacing ─────────────────────────────── */
 
   --space-1:  4px;
   --space-2:  8px;
@@ -152,8 +124,6 @@
   --space-16: 64px;
   --space-20: 80px;
   --space-24: 96px;
-
-  /* ── Padding (Semantic Layout & Components) ─ */
 
   --p-btn-xs:  var(--space-1) var(--space-2);
   --p-btn-sm:  var(--space-1) var(--space-3);
@@ -178,9 +148,6 @@
   --p-section-lg: var(--space-6) var(--space-16);
   --p-section-xl: var(--space-6) var(--space-20);
 
-
-  /* ── Typography ──────────────────────────── */
-
   --font-sans: "IBM Plex Sans", sans-serif;
   --font-mono: ui-monospace, 'Cascadia Code', 'Fira Code', Consolas, monospace;
 
@@ -202,15 +169,9 @@
   --weight-semibold: 600;
   --weight-bold:     700;
 
-
-  /* ── Transitions ─────────────────────────── */
-
   --transition-fast:   100ms ease;
   --transition-normal: 180ms ease;
   --transition-slow:   300ms ease;
-
-
-  /* ── Z-index ─────────────────────────────── */
 
   --z-base:    0;
   --z-raised:  10;
@@ -221,33 +182,26 @@
   --z-toast:   500;
 }
 
-
-/* ── Dark Mode ──────────────────────────────── */
-
 @media (prefers-color-scheme: dark) {
   :root {
     color-scheme: dark;
 
-    /* Surfaces */
     --bg-primary:   #0d1117;
     --bg-secondary: #161b22;
     --bg-tertiary:  #1c2128;
     --bg-elevated:  #1c2128;
     --bg-overlay:   rgba(0, 0, 0, 0.6);
 
-    /* Text */
     --text-primary:   #e6edf3;
     --text-secondary: #8d96a0;
     --text-muted:     #484f58;
     --text-inverse:   #0d1117;
     --text-disabled:  #30363d;
 
-    /* Borders */
     --border:        #30363d;
     --border-strong: #484f58;
     --border-focus:  var(--emerald-400);
 
-    /* Brand / Primary */
     --color-primary:        var(--emerald-400);
     --color-primary-hover:  var(--emerald-300);
     --color-primary-active: var(--emerald-200);
@@ -255,14 +209,12 @@
     --color-primary-border: rgba(52, 211, 153, 0.25);
     --color-primary-text:   var(--emerald-400);
 
-    /* Success */
     --color-success:        var(--emerald-400);
     --color-success-hover:  var(--emerald-300);
     --color-success-light:  rgba(52, 211, 153, 0.1);
     --color-success-border: rgba(52, 211, 153, 0.25);
     --color-success-text:   var(--emerald-400);
 
-    /* Danger */
     --color-danger:        var(--red-400);
     --color-danger-hover:  var(--red-500);
     --color-danger-active: var(--red-200);
@@ -270,21 +222,18 @@
     --color-danger-border: rgba(248, 113, 113, 0.25);
     --color-danger-text:   var(--red-400);
 
-    /* Warning */
     --color-warning:        var(--amber-400);
     --color-warning-hover:  var(--amber-300);
     --color-warning-light:  rgba(251, 191, 36, 0.1);
     --color-warning-border: rgba(251, 191, 36, 0.25);
     --color-warning-text:   var(--amber-400);
 
-    /* Info */
     --color-info:        var(--blue-400);
     --color-info-hover:  var(--blue-300);
     --color-info-light:  rgba(96, 165, 250, 0.1);
     --color-info-border: rgba(96, 165, 250, 0.25);
     --color-info-text:   var(--blue-400);
 
-    /* Shadows */
     --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.3);
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.2);
     --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.2);

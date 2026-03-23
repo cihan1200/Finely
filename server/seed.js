@@ -90,7 +90,7 @@ const seedDatabase = async () => {
             date: new Date(
               monthDate.getFullYear(),
               monthDate.getMonth(),
-              Math.floor(Math.random() * 28) + 1 // random day
+              Math.floor(Math.random() * 28) + 1
             )
           });
         }

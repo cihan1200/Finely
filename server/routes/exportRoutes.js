@@ -136,8 +136,6 @@ function buildPdf(title, sections) {
         });
     };
 
-    // pageAdded is NOT used — footer is drawn explicitly at the end
-
     const HEADER_H = 92;
     doc.rect(0, 0, doc.page.width, HEADER_H).fill(BRAND);
 
@@ -218,9 +216,6 @@ function buildPdf(title, sections) {
       doc.moveDown(1.5);
     });
 
-    // Temporarily remove the bottom margin so the absolute footer positions
-    // (which sit inside PDFKit's default 50px bottom margin) don't trigger a
-    // new page when doc.text() is called with an explicit y coordinate.
     const savedBottom = doc.page.margins.bottom;
     doc.page.margins.bottom = 0;
     drawFooter();

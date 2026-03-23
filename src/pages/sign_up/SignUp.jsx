@@ -12,9 +12,7 @@ import { useNavigate } from "react-router-dom";
 
 function parseJwt(token) {
   try {
-    // 1. base64url → base64
     const base64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
-    // 2. Decode to a byte array and parse as UTF-8 (handles all Unicode)
     const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
     return JSON.parse(new TextDecoder().decode(bytes));
   } catch {
