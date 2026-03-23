@@ -22,22 +22,31 @@ export default function TransactionsSummary({ transactions }) {
   const fmt = (n) =>
     n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+  function formatMoney(n) {
+    const abs = Math.abs(n);
+    if (abs >= 1_000_000_000_000) return `$${(n / 1_000_000_000_000).toFixed(1)}T`;
+    if (abs >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(1)}B`;
+    if (abs >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
+    if (abs >= 10_000) return `$${(n / 1_000).toFixed(1)}K`;
+    return `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+
   const CARDS = [
     {
       label: 'Total income',
-      value: `$${fmt(income)}`,
+      value: formatMoney(income),
       icon: faArrowTrendUp,
       color: 'success',
     },
     {
       label: 'Total expenses',
-      value: `$${fmt(expenses)}`,
+      value: formatMoney(expenses),
       icon: faArrowTrendDown,
       color: 'danger',
     },
     {
       label: 'Net balance',
-      value: `${net >= 0 ? '+' : '-'}$${fmt(Math.abs(net))}`,
+      value: `${net >= 0 ? '+' : '-'}${formatMoney(Math.abs(net))}`,
       icon: faScaleBalanced,
       color: net >= 0 ? 'success' : 'danger',
     },

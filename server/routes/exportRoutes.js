@@ -8,8 +8,6 @@ import mongoose from "mongoose";
 
 const router = express.Router();
 
-// ── Date range helper ──────────────────────────────────────────────────────────
-
 function getDateRange(range, from, to) {
   const now = new Date();
 
@@ -60,8 +58,6 @@ function getRangeLabel(range, from, to) {
   if (range === "custom") return `${from} → ${to}`;
   return labels[range] ?? range;
 }
-
-// ── CSV helpers ────────────────────────────────────────────────────────────────
 
 function escapeCsv(val) {
   if (val === null || val === undefined) return "";
@@ -117,8 +113,6 @@ function analyticsToCsv(data) {
   );
 }
 
-// ── PDF builder ────────────────────────────────────────────────────────────────
-
 function buildPdf(title, sections) {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({ margin: 50, size: "A4" });
@@ -133,10 +127,51 @@ function buildPdf(title, sections) {
     const DARK = "#111827";
     const PAGE_W = doc.page.width - 100;
 
-    doc.rect(0, 0, doc.page.width, 80).fill(BRAND);
-    doc.fillColor("#ffffff").fontSize(22).font("Helvetica-Bold").text("finely", 50, 28);
-    doc.fontSize(11).font("Helvetica").text(title, 50, 54);
-    doc.moveDown(3);
+    const drawFooter = () => {
+      doc.moveTo(50, doc.page.height - 40).lineTo(50 + PAGE_W, doc.page.height - 40)
+        .strokeColor("#e5e7eb").lineWidth(1).stroke();
+      doc.fillColor(GRAY).fontSize(8)
+        .text("Exported by Finely — finely.app", 50, doc.page.height - 28, {
+          align: "center", width: PAGE_W,
+        });
+    };
+
+    // pageAdded is NOT used — footer is drawn explicitly at the end
+
+    const HEADER_H = 92;
+    doc.rect(0, 0, doc.page.width, HEADER_H).fill(BRAND);
+
+    const LS = 0.58;
+    const LX = 50;
+    const LY = 10;
+
+    doc.save();
+    doc.opacity(0.22);
+    doc.roundedRect(LX, LY, 55 * LS, 55 * LS, 15 * LS).fill("#ffffff");
+    doc.restore();
+
+    const chartPts = [[10, 38], [22, 22], [33, 30], [45, 13]];
+    const sp = ([px, py]) => [LX + px * LS, LY + py * LS];
+    const [g0, g1, g2, g3] = chartPts.map(sp);
+
+    doc.save();
+    doc.opacity(0.3);
+    doc.moveTo(...g0).lineTo(...g1).lineTo(...g2).lineTo(...g3)
+      .lineWidth(3 * LS).strokeColor("#ffffff").stroke();
+    doc.restore();
+
+    doc.moveTo(...g0).lineTo(...g1).lineTo(...g2).lineTo(...g3)
+      .lineWidth(2.8 * LS).strokeColor("#ffffff").stroke();
+
+    const [dotX, dotY] = sp([45, 13]);
+    doc.circle(dotX, dotY, 4 * LS).fill("#ffffff");
+
+    const wordX = LX + 55 * LS + 9;
+    const wordY = LY + (55 * LS) / 2 - 10;
+    doc.fillColor("#f0fdf9").fontSize(20).font("Helvetica").text("finely", wordX, wordY);
+
+    doc.fillColor("rgba(255,255,255,0.80)").fontSize(10).font("Helvetica").text(title, LX, LY + 55 * LS + 5);
+    doc.text("", 50, HEADER_H + 12);
     doc.fillColor(GRAY).fontSize(9)
       .text(`Generated on ${new Date().toLocaleDateString("en-US", { dateStyle: "long" })}`, { align: "right" });
     doc.moveDown(1);
@@ -149,30 +184,31 @@ function buildPdf(title, sections) {
 
       if (headers?.length) {
         const colW = PAGE_W / headers.length;
-        doc.rect(50, doc.y, PAGE_W, 18).fill("#f3f4f6");
+        const headerBgY = doc.y;
+        doc.rect(50, headerBgY, PAGE_W, 18).fill("#f3f4f6");
         doc.fillColor(GRAY).fontSize(8).font("Helvetica-Bold");
         headers.forEach((h, ci) => {
-          doc.text(h, 54 + ci * colW, doc.y - 14, { width: colW - 4, lineBreak: false });
+          doc.text(h, 54 + ci * colW, headerBgY + 4, { width: colW - 4, lineBreak: false });
         });
-        doc.moveDown(0.4);
+        doc.text("", 50, headerBgY + 24);
         doc.font("Helvetica").fontSize(9).fillColor(DARK);
 
         rows.forEach((row, ri) => {
-          if (doc.y > doc.page.height - 100) doc.addPage();
+          if (doc.y > doc.page.height - 80) doc.addPage();
           const rowY = doc.y;
-          const colW = PAGE_W / row.length;
+          const cellW = PAGE_W / row.length;
           if (ri % 2 === 0) doc.rect(50, rowY, PAGE_W, 16).fill("#f9fafb");
           doc.fillColor(DARK);
           row.forEach((cell, ci) => {
-            doc.text(String(cell ?? ""), 54 + ci * colW, rowY + 3, {
-              width: colW - 8, lineBreak: false, ellipsis: true,
+            doc.text(String(cell ?? ""), 54 + ci * cellW, rowY + 3, {
+              width: cellW - 8, lineBreak: false, ellipsis: true,
             });
           });
-          doc.moveDown(0.15);
+          doc.text("", 50, rowY + 16);
         });
       } else {
         rows.forEach(([key, val]) => {
-          if (doc.y > doc.page.height - 100) doc.addPage();
+          if (doc.y > doc.page.height - 80) doc.addPage();
           doc.fillColor(GRAY).fontSize(9).font("Helvetica-Bold")
             .text(key, 50, doc.y, { continued: true, width: 180 });
           doc.fillColor(DARK).font("Helvetica").text(String(val ?? ""), { align: "right" });
@@ -182,18 +218,17 @@ function buildPdf(title, sections) {
       doc.moveDown(1.5);
     });
 
-    doc.moveTo(50, doc.page.height - 40).lineTo(50 + PAGE_W, doc.page.height - 40)
-      .strokeColor("#e5e7eb").lineWidth(1).stroke();
-    doc.fillColor(GRAY).fontSize(8)
-      .text("Exported by Finely — finely.app", 50, doc.page.height - 28, {
-        align: "center", width: PAGE_W,
-      });
+    // Temporarily remove the bottom margin so the absolute footer positions
+    // (which sit inside PDFKit's default 50px bottom margin) don't trigger a
+    // new page when doc.text() is called with an explicit y coordinate.
+    const savedBottom = doc.page.margins.bottom;
+    doc.page.margins.bottom = 0;
+    drawFooter();
+    doc.page.margins.bottom = savedBottom;
 
     doc.end();
   });
 }
-
-// ── Data fetchers ──────────────────────────────────────────────────────────────
 
 async function fetchTransactions(userId, start, end) {
   return Transaction.find({ userId, date: { $gte: start, $lt: end } }).sort({ date: -1 });
@@ -225,8 +260,6 @@ async function fetchAnalyticsSummary(userId, start, end) {
   return { totalIncome, totalExpenses, netSavings, savingsRate, transactionCount: txs.length };
 }
 
-// ── GET /export/history ────────────────────────────────────────────────────────
-
 router.get("/history", verifyToken, async (req, res) => {
   try {
     const records = await ExportRecord.find({ userId: req.user.id })
@@ -246,8 +279,6 @@ router.get("/history", verifyToken, async (req, res) => {
     res.status(500).json({ message: "Failed to fetch export history", error: err.message });
   }
 });
-
-// ── GET /export ────────────────────────────────────────────────────────────────
 
 router.get("/", verifyToken, async (req, res) => {
   try {
@@ -272,7 +303,6 @@ router.get("/", verifyToken, async (req, res) => {
     const rangeLabel = getRangeLabel(range, from, to);
     const rangeFilename = `${start.toISOString().split("T")[0]}_${new Date(end.getTime() - 1).toISOString().split("T")[0]}`;
 
-    // ── JSON ──
     if (format === "json") {
       const payload = {};
       if (transactions.length) payload.transactions = transactions.map((t) => ({
@@ -291,7 +321,6 @@ router.get("/", verifyToken, async (req, res) => {
       return res.json(payload);
     }
 
-    // ── CSV ──
     if (format === "csv") {
       let csv = `# Finely Export — ${dataType} — ${rangeLabel}\n\n`;
       if (transactions.length) {
@@ -314,7 +343,6 @@ router.get("/", verifyToken, async (req, res) => {
       return res.send(csv);
     }
 
-    // ── PDF ──
     if (format === "pdf") {
       const sections = [];
 
@@ -366,6 +394,28 @@ router.get("/", verifyToken, async (req, res) => {
   } catch (err) {
     console.error("Export error:", err);
     res.status(500).json({ message: "Export failed", error: err.message });
+  }
+});
+
+router.delete("/history/:id", verifyToken, async (req, res) => {
+  try {
+    const record = await ExportRecord.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.user.id,
+    });
+    if (!record) return res.status(404).json({ message: "Record not found." });
+    res.status(200).json({ message: "Deleted." });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to delete record", error: err.message });
+  }
+});
+
+router.delete("/history", verifyToken, async (req, res) => {
+  try {
+    await ExportRecord.deleteMany({ userId: req.user.id });
+    res.status(200).json({ message: "All history cleared." });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to clear history", error: err.message });
   }
 });
 

@@ -4,6 +4,8 @@ import Button from '../button/Button';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faXmark, faArrowUp, faArrowDown, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 
+const MAX_LIMIT = 999_999;
+
 const CATEGORIES = [
   'Food', 'Entertainment', 'Transport', 'Utilities',
   'Health', 'Education', 'Clothing', 'Income', 'Other',
@@ -38,6 +40,8 @@ export default function AddTransactionModal({ onClose, onAdd }) {
     if (!form.label.trim()) e.label = 'Name is required';
     if (!form.amount || isNaN(Number(form.amount)) || Number(form.amount) <= 0)
       e.amount = 'Enter a valid amount';
+    else if (Number(form.amount) > MAX_LIMIT)
+      e.amount = `Amount cannot exceed $${MAX_LIMIT.toLocaleString()}`;
     if (!form.date) e.date = 'Date is required';
     return e;
   };
@@ -109,10 +113,11 @@ export default function AddTransactionModal({ onClose, onAdd }) {
 
           <div className={styles.row}>
             <div className={styles.field}>
-              <label className={styles.label}>Amount ($)</label>
+              <label className={styles.label}>Amount (max $999,999)</label>
               <input
                 type="number"
                 min="0"
+                max={MAX_LIMIT}
                 step="0.01"
                 className={`${styles.input} ${errors.amount ? styles.inputError : ''}`}
                 placeholder="0.00"

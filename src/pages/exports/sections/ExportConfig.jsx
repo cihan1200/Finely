@@ -116,7 +116,6 @@ export default function ExportConfig({ onExported }) {
 
   return (
     <div className={styles.card}>
-      {/* ── Data type ── */}
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>What to export</h2>
         <div className={styles.dataGrid}>
@@ -135,7 +134,6 @@ export default function ExportConfig({ onExported }) {
         </div>
       </section>
 
-      {/* ── Format ── */}
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>File format</h2>
         <div className={styles.formatGrid}>
@@ -156,7 +154,6 @@ export default function ExportConfig({ onExported }) {
         </div>
       </section>
 
-      {/* ── Date range ── */}
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>Date range</h2>
         <div className={styles.rangeGrid}>
@@ -203,7 +200,6 @@ export default function ExportConfig({ onExported }) {
         )}
       </section>
 
-      {/* ── Summary + CTA ── */}
       <div className={styles.footer}>
         {error && <p className={styles.error}>{error}</p>}
 

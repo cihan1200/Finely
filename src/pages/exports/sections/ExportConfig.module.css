@@ -14,8 +14,6 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Sections ─────────────────────────────── */
-
 .section {
   display: flex;
   flex-direction: column;
@@ -30,8 +28,6 @@
   letter-spacing: 0.07em;
   margin: 0;
 }
-
-/* ── Data type buttons ────────────────────── */
 
 .dataGrid {
   display: grid;
@@ -86,8 +82,6 @@
   font-weight: var(--weight-semibold);
   white-space: nowrap;
 }
-
-/* ── Format buttons ───────────────────────── */
 
 .formatGrid {
   display: flex;
@@ -176,8 +170,6 @@
   box-shadow: inset 0 0 0 3px var(--bg-primary);
 }
 
-/* ── Range buttons ────────────────────────── */
-
 .rangeGrid {
   display: flex;
   flex-wrap: wrap;
@@ -219,8 +211,6 @@
   color: var(--color-primary-text);
 }
 
-/* ── Custom range ─────────────────────────── */
-
 .customRange {
   display: flex;
   align-items: flex-end;
@@ -228,7 +218,7 @@
   padding: var(--space-4);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  background-color: var(--bg-secondary);
+  background-color: var(--bg-tertiary);
   animation: slideDown 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -277,14 +267,11 @@
   flex-shrink: 0;
 }
 
-/* ── Footer ───────────────────────────────── */
 
 .footer {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  padding-top: var(--space-4);
-  border-top: 1px solid var(--border);
 }
 
 .error {

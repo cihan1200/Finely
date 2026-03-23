@@ -9,6 +9,8 @@ import {
   faTriangleExclamation, faCircleCheck,
 } from '@fortawesome/free-solid-svg-icons';
 
+const MAX_LIMIT = 999_999;
+
 const ICON_MAP = {
   utensils: faUtensils,
   film: faFilm,
@@ -23,6 +25,15 @@ const ICON_MAP = {
 
 const getIcon = (name) => ICON_MAP[name] ?? faTag;
 
+function formatMoney(n) {
+  const abs = Math.abs(n);
+  if (abs >= 1_000_000_000_000) return `$${(n / 1_000_000_000_000).toFixed(1)}T`;
+  if (abs >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(1)}B`;
+  if (abs >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
+  if (abs >= 10_000) return `$${(n / 1_000).toFixed(1)}K`;
+  return `$${n.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+}
+
 function BudgetCard({ budget, onDeleteRequest, onUpdateLimit, deleting }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(budget.limit.toString());
@@ -34,7 +45,7 @@ function BudgetCard({ budget, onDeleteRequest, onUpdateLimit, deleting }) {
 
   const saveEdit = () => {
     const val = Number(draft);
-    if (!isNaN(val) && val > 0) {
+    if (!isNaN(val) && val > 0 && val <= MAX_LIMIT) {
       onUpdateLimit(budget.id, val);
     } else {
       setDraft(budget.limit.toString());
@@ -63,7 +74,7 @@ function BudgetCard({ budget, onDeleteRequest, onUpdateLimit, deleting }) {
             <span className={styles.cardLabel}>{budget.label}</span>
             <span className={styles.cardStatus} data-over={over}>
               <FontAwesomeIcon icon={over ? faTriangleExclamation : faCircleCheck} />
-              {over ? `$${(budget.spent - budget.limit).toFixed(0)} over` : 'On track'}
+              {over ? `${formatMoney(budget.spent - budget.limit)} over` : 'On track'}
             </span>
           </div>
         </div>
@@ -81,7 +92,7 @@ function BudgetCard({ budget, onDeleteRequest, onUpdateLimit, deleting }) {
         <div className={styles.amountSpent}>
           <span className={styles.amountLabel}>Spent</span>
           <span className={styles.amountValue} data-over={over}>
-            ${budget.spent.toFixed(0)}
+            {formatMoney(budget.spent)}
           </span>
         </div>
 
@@ -94,6 +105,7 @@ function BudgetCard({ budget, onDeleteRequest, onUpdateLimit, deleting }) {
                 autoFocus
                 type="number"
                 min="1"
+                max={MAX_LIMIT}
                 className={styles.editInput}
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
@@ -107,14 +119,14 @@ function BudgetCard({ budget, onDeleteRequest, onUpdateLimit, deleting }) {
               </button>
             </div>
           ) : (
-            <span className={styles.amountValue}>${budget.limit.toFixed(0)}</span>
+            <span className={styles.amountValue}>{formatMoney(budget.limit)}</span>
           )}
         </div>
 
         <div className={styles.amountRemaining}>
           <span className={styles.amountLabel}>{over ? 'Over by' : 'Remaining'}</span>
           <span className={styles.amountValue} data-over={over}>
-            ${Math.abs(remaining).toFixed(0)}
+            {formatMoney(Math.abs(remaining))}
           </span>
         </div>
       </div>

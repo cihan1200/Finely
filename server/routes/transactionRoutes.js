@@ -4,6 +4,8 @@ import { verifyToken } from "../middleware/auth.js";
 
 const router = express.Router();
 
+const MAX_LIMIT = 999_999;
+
 router.get("/", verifyToken, async (req, res) => {
   try {
     const transactions = await Transaction.find({ userId: req.user.id }).sort({ date: -1 });
@@ -25,6 +27,11 @@ router.get("/", verifyToken, async (req, res) => {
 
 router.post("/", verifyToken, async (req, res) => {
   try {
+    const { amount } = req.body;
+    if (!amount || isNaN(Number(amount)) || Number(amount) <= 0 || Number(amount) > MAX_LIMIT) {
+      return res.status(400).json({ message: `Amount must be between $0.01 and $${MAX_LIMIT.toLocaleString()}.` });
+    }
+
     const transactionData = {
       ...req.body,
       userId: req.user.id

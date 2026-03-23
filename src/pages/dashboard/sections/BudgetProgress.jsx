@@ -21,6 +21,15 @@ const ICON_MAP = {
 };
 const getIcon = (name) => ICON_MAP[name] ?? faTag;
 
+function formatMoney(n) {
+  const abs = Math.abs(n);
+  if (abs >= 1_000_000_000_000) return `$${(n / 1_000_000_000_000).toFixed(1)}T`;
+  if (abs >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(1)}B`;
+  if (abs >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
+  if (abs >= 10_000) return `$${(n / 1_000).toFixed(1)}K`;
+  return `$${n.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+}
+
 const now = new Date();
 const MONTH_NAME = now.toLocaleString('en-US', { month: 'long' });
 
@@ -86,9 +95,9 @@ export default function BudgetProgress() {
                   </div>
                   <div className={styles.itemRight}>
                     <span className={styles.itemSpent} data-over={over}>
-                      ${b.spent.toFixed(0)}
+                      {formatMoney(b.spent)}
                     </span>
-                    <span className={styles.itemLimit}>/ ${b.limit.toFixed(0)}</span>
+                    <span className={styles.itemLimit}>/ {formatMoney(b.limit)}</span>
                   </div>
                 </div>
                 <div className={styles.track}>
@@ -100,7 +109,7 @@ export default function BudgetProgress() {
                 </div>
                 {over && (
                   <span className={styles.overLabel}>
-                    ${(b.spent - b.limit).toFixed(0)} over budget
+                    {formatMoney(b.spent - b.limit)} over budget
                   </span>
                 )}
               </div>

@@ -155,7 +155,7 @@ export default function Transactions() {
                     </td>
                     <td className={`${styles.td} ${styles.tdRight}`}>
                       <span className={styles.amount} data-sign={tx.sign}>
-                        {tx.sign === 'income' ? '+' : '-'}${Math.abs(tx.amount).toFixed(2)}
+                        {tx.sign === 'income' ? '+' : '-'}${Math.abs(tx.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </span>
                     </td>
                   </tr>

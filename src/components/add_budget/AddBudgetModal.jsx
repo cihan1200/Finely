@@ -8,6 +8,8 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import api from '../../utils/api';
 
+const MAX_LIMIT = 999_999;
+
 const CATEGORY_OPTIONS = [
   { label: 'Food & dining', category: 'Food', icon: 'utensils', color: 'warning' },
   { label: 'Entertainment', category: 'Entertainment', icon: 'film', color: 'primary' },
@@ -56,6 +58,8 @@ export default function AddBudgetModal({ onClose, onAdd, existingCategories = []
     if (!form.label) e.label = 'Select a category';
     if (!form.limit || isNaN(Number(form.limit)) || Number(form.limit) <= 0)
       e.limit = 'Enter a valid limit';
+    else if (Number(form.limit) > MAX_LIMIT)
+      e.limit = `Limit cannot exceed $${MAX_LIMIT.toLocaleString()}`;
     return e;
   };
 
@@ -121,10 +125,11 @@ export default function AddBudgetModal({ onClose, onAdd, existingCategories = []
           </div>
 
           <div className={styles.field}>
-            <label className={styles.label}>Monthly limit ($)</label>
+            <label className={styles.label}>Monthly limit (max $999,999)</label>
             <input
               type="number"
               min="1"
+              max={MAX_LIMIT}
               step="0.01"
               className={`${styles.input} ${errors.limit ? styles.inputError : ''}`}
               placeholder="e.g. 300"

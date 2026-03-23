@@ -105,10 +105,6 @@
   padding: var(--space-2) 0;
 }
 
-.sidebar.collapsed .divider {
-  margin: var(--space-2) 0;
-}
-
 .logoImg {
   height: 40px;
   max-width: max-content;
@@ -229,7 +225,7 @@
 .divider {
   height: 1px;
   background-color: var(--border);
-  margin: var(--space-2) var(--space-1);
+  margin: var(--space-2) calc(-1 * var(--space-2));
 }
 
 .userRow {

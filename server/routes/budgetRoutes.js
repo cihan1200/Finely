@@ -6,6 +6,8 @@ import mongoose from "mongoose";
 
 const router = express.Router();
 
+const MAX_LIMIT = 999_999;
+
 router.get("/", verifyToken, async (req, res) => {
   try {
     const budgets = await Budget.find({ userId: req.user.id });
@@ -60,6 +62,10 @@ router.post("/", verifyToken, async (req, res) => {
       return res.status(409).json({ message: "Budget for this category already exists" });
     }
 
+    if (!limit || isNaN(Number(limit)) || Number(limit) <= 0 || Number(limit) > MAX_LIMIT) {
+      return res.status(400).json({ message: `Limit must be between $1 and $${MAX_LIMIT.toLocaleString()}.` });
+    }
+
     const budget = new Budget({ userId: req.user.id, label, category, icon, color, limit });
     const saved = await budget.save();
 
@@ -87,8 +93,8 @@ router.put("/:id", verifyToken, async (req, res) => {
     }
 
     const { limit } = req.body;
-    if (!limit || isNaN(Number(limit)) || Number(limit) <= 0) {
-      return res.status(400).json({ message: "Invalid limit value" });
+    if (!limit || isNaN(Number(limit)) || Number(limit) <= 0 || Number(limit) > MAX_LIMIT) {
+      return res.status(400).json({ message: `Limit must be between $1 and $${MAX_LIMIT.toLocaleString()}.` });
     }
 
     budget.limit = Number(limit);

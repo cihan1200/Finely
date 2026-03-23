@@ -32,9 +32,7 @@ const BOTTOM_ITEMS = [
 
 function parseJwt(token) {
   try {
-    // 1. base64url → base64
     const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
-    // 2. Decode to a byte array and parse as UTF-8 (handles all Unicode)
     const bytes = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
     return JSON.parse(new TextDecoder().decode(bytes));
   } catch {
@@ -43,7 +41,6 @@ function parseJwt(token) {
 }
 
 function getUser() {
-  // Preferred: explicit user object stored at sign-in
   try {
     const raw = localStorage.getItem('finely-user');
     if (raw) {
@@ -51,10 +48,8 @@ function getUser() {
       if (parsed.name || parsed.email) return parsed;
     }
   } catch {
-    // fall through
   }
 
-  // Fallback: decode the JWT that is already in localStorage
   try {
     const token = localStorage.getItem('token');
     if (token) {
@@ -66,7 +61,6 @@ function getUser() {
       return { name, email: email || '' };
     }
   } catch {
-    // fall through
   }
 
   return { name: '', email: '' };

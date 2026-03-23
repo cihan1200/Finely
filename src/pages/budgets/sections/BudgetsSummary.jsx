@@ -7,6 +7,15 @@ import {
   faChartPie,
 } from '@fortawesome/free-solid-svg-icons';
 
+function formatMoney(n) {
+  const abs = Math.abs(n);
+  if (abs >= 1_000_000_000_000) return `$${(n / 1_000_000_000_000).toFixed(1)}T`;
+  if (abs >= 1_000_000_000) return `$${(n / 1_000_000_000).toFixed(1)}B`;
+  if (abs >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
+  if (abs >= 10_000) return `$${(n / 1_000).toFixed(1)}K`;
+  return `$${n.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+}
+
 export default function BudgetsSummary({ budgets }) {
   const totalLimit = budgets.reduce((s, b) => s + b.limit, 0);
   const totalSpent = budgets.reduce((s, b) => s + b.spent, 0);
@@ -18,14 +27,14 @@ export default function BudgetsSummary({ budgets }) {
   const CARDS = [
     {
       label: 'Total budget',
-      value: `$${totalLimit.toLocaleString()}`,
+      value: formatMoney(totalLimit),
       sub: 'across all categories',
       icon: faBullseye,
       color: 'primary',
     },
     {
       label: 'Total spent',
-      value: `$${totalSpent.toLocaleString()}`,
+      value: formatMoney(totalSpent),
       sub: `${overallPct}% of total budget`,
       icon: faChartPie,
       color: overallPct >= 90 ? 'danger' : overallPct >= 70 ? 'warning' : 'success',
@@ -39,7 +48,7 @@ export default function BudgetsSummary({ budgets }) {
     },
     {
       label: overCount > 0 ? 'Over budget' : 'Remaining',
-      value: overCount > 0 ? `${overCount} categor${overCount === 1 ? 'y' : 'ies'}` : `$${remaining.toLocaleString()}`,
+      value: overCount > 0 ? `${overCount} categor${overCount === 1 ? 'y' : 'ies'}` : formatMoney(remaining),
       sub: overCount > 0 ? 'exceeded their limit' : 'left to spend',
       icon: faTriangleExclamation,
       color: overCount > 0 ? 'danger' : 'info',
