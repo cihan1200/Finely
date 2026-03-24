@@ -16,8 +16,6 @@
   pointer-events: none;
   will-change: transform;
   transform: translateZ(0);
-  mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
 }
 
 .heroBg::after {
@@ -453,7 +451,7 @@
 
 .txCategory {
   font-size: 11px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
 }
 
 .txAmount {

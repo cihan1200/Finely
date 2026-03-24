@@ -5,6 +5,7 @@ import logoDark from '../../assests/logo-dark.svg';
 import { useTheme } from '../../contexts/ThemeContext';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSun, faMoon, faBars, faXmark, faRightFromBracket } from '@fortawesome/free-solid-svg-icons';
+import Button from '../button/Button';
 
 const NAV_LINKS = [
   { label: 'Features', href: '#features' },
@@ -33,7 +34,7 @@ export default function Header() {
     const target = document.querySelector(href);
     if (!target) return;
     const headerHeight = document.querySelector('[data-header]')?.offsetHeight ?? 80;
-    const top = target.getBoundingClientRect().top + window.scrollY - headerHeight - 16;
+    const top = target.getBoundingClientRect().top + window.scrollY - headerHeight;
     window.scrollTo({ top, behavior: 'smooth' });
   };
 
@@ -67,10 +68,9 @@ export default function Header() {
 
         <div className={styles.ctas}>
           {isLoggedIn ? (
-            <button className={styles.ctaLogout} onClick={logout}>
-              <FontAwesomeIcon icon={faRightFromBracket} />
-              Log out
-            </button>
+            <Button variant='primary' onClick={logout}>
+              <FontAwesomeIcon icon={faRightFromBracket} />Log out
+            </Button>
           ) : (
             <>
               <a href="/signin" className={styles.ctaLogin}>Log in</a>
@@ -132,10 +132,9 @@ export default function Header() {
           </nav>
           <div className={styles.mobileCtas}>
             {isLoggedIn ? (
-              <button className={styles.mobileCtaLogout} onClick={logout}>
-                <FontAwesomeIcon icon={faRightFromBracket} />
-                Log out
-              </button>
+              <Button variant='primary' onClick={logout}>
+                <FontAwesomeIcon icon={faRightFromBracket} />Log out
+              </Button>
             ) : (
               <>
                 <a href="/signin" className={styles.mobileCtaLogin} onClick={closeMenu}>

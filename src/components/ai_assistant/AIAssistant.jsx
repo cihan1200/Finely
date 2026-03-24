@@ -196,7 +196,7 @@ export default function AIAssistant() {
         aria-label="Open AI Assistant"
       >
         <FontAwesomeIcon icon={faWandMagicSparkles} className={styles.triggerIcon} />
-        <span className={styles.triggerLabel}>Ask AI</span>
+        <span className={styles.triggerLabel}>Ask to assistant</span>
       </button>
 
       <div className={`${styles.panel} ${isOpen ? styles.panelOpen : ''}`}>

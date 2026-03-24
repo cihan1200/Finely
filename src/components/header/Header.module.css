@@ -1,6 +1,12 @@
 .wrapper {
   width: 100%;
   z-index: var(--z-sticky);
+  position: sticky;
+  top: 0;
+  background-color: color-mix(in srgb, var(--bg-primary) 80%, transparent);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 40%, transparent);
 }
 
 @media (max-width: 768px) {

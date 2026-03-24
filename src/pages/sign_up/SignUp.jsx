@@ -9,6 +9,7 @@ import Button from "../../components/button/Button";
 import Message from "../../components/message/Message";
 import { useTheme } from "../../contexts/ThemeContext";
 import { useNavigate } from "react-router-dom";
+import { useGoogleLogin } from '@react-oauth/google';
 
 function parseJwt(token) {
   try {
@@ -90,6 +91,39 @@ export default function SignUp() {
     }
   };
 
+  const loginWithGoogle = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        setIsLoading(true);
+        const response = await api.post("/auth/google", {
+          access_token: tokenResponse.access_token,
+        });
+
+        const { token } = response.data;
+        const { firstName, lastName, email } = parseJwt(token);
+
+        localStorage.setItem("token", token);
+        localStorage.setItem("finely-user", JSON.stringify({
+          name: [firstName, lastName].filter(Boolean).join(" "),
+          email: email || "",
+        }));
+
+        navigate("/dashboard");
+      } catch (err) {
+        setModal({
+          isOpen: true,
+          message: err.response?.data?.message || "Google authentication failed",
+          variant: "error"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    onError: () => {
+      setModal({ isOpen: true, message: "Google login was cancelled or failed", variant: "error" });
+    }
+  });
+
   return (
     <>
       <Message
@@ -111,11 +145,12 @@ export default function SignUp() {
 
           <form className={styles.form} onSubmit={handleSubmit}>
             <Button
-              variant="secondary"
+              variant="primary"
               size="large"
               fullWidth
               type="button"
               icon={<FontAwesomeIcon icon={faGoogle} />}
+              onClick={() => loginWithGoogle()}
             >
               Continue with Google
             </Button>
