@@ -26,7 +26,7 @@ export default function Hero() {
           </p>
 
           <div className={styles.actions}>
-            <a href="/register">
+            <a href="/signup">
               <Button
                 variant="primary"
                 size="medium"
