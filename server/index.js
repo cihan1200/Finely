@@ -8,6 +8,8 @@ import analyticRoutes from "./routes/analyticRoutes.js";
 import budgetRoutes from "./routes/budgetRoutes.js";
 import exportRoutes from "./routes/exportRoutes.js";
 import aiRoutes from "./routes/aiRoutes.js";
+import cardRoutes from "./routes/cardRoutes.js";
+import plaidRoutes from "./routes/plaidRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -35,6 +37,8 @@ app.use("/analytic", analyticRoutes);
 app.use("/budget", budgetRoutes);
 app.use("/export", exportRoutes);
 app.use("/ai", aiRoutes);
+app.use("/card", cardRoutes);
+app.use("/plaid", plaidRoutes);
 
 app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
