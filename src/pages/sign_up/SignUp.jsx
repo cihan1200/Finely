@@ -26,6 +26,7 @@ export default function SignUp() {
   const navigate = useNavigate();
   const logo = theme === "dark" ? logoDark : logoLight;
   const [isLoading, setIsLoading] = useState(false);
+  const [signupSuccess, setSignupSuccess] = useState(false);
 
   const [modal, setModal] = useState({
     isOpen: false,
@@ -70,16 +71,14 @@ export default function SignUp() {
         password: formData.password,
       });
 
-      const { token } = response.data;
-      const { firstName: fn, lastName: ln, email } = parseJwt(token);
-
-      localStorage.setItem("token", token);
-      localStorage.setItem("finely-user", JSON.stringify({
-        name: [fn, ln].filter(Boolean).join(" "),
-        email: email || "",
-      }));
-
-      navigate("/dashboard");
+      // Signup successful, show success state
+      setSignupSuccess(true);
+      setFormData({
+        fullName: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      });
     } catch (err) {
       setModal({
         isOpen: true,
@@ -100,15 +99,14 @@ export default function SignUp() {
         });
 
         const { token } = response.data;
-        const { firstName, lastName, email } = parseJwt(token);
-
         localStorage.setItem("token", token);
-        localStorage.setItem("finely-user", JSON.stringify({
-          name: [firstName, lastName].filter(Boolean).join(" "),
-          email: email || "",
-        }));
 
-        navigate("/dashboard");
+        // Fetch user profile (Google users are automatically verified)
+        const { data: user } = await api.get("/auth/me");
+        localStorage.setItem("finely-user", JSON.stringify(user));
+
+        // Redirect to setup page
+        navigate("/setup");
       } catch (err) {
         setModal({
           isOpen: true,
@@ -133,95 +131,129 @@ export default function SignUp() {
         onClose={() => setModal({ ...modal, isOpen: false })}
       />
 
-      <div className={styles.container}>
-        <div className={styles.card}>
-          <div className={styles.header}>
-            <div className={styles.logo}>
-              <img src={logo} alt="finely logo" onClick={() => navigate("/")} />
-            </div>
-            <h1>Create account</h1>
-            <p>Start managing your finances today</p>
-          </div>
-
-          <form className={styles.form} onSubmit={handleSubmit}>
-            <Button
-              variant="primary"
-              size="large"
-              fullWidth
-              type="button"
-              icon={<FontAwesomeIcon icon={faGoogle} />}
-              onClick={() => loginWithGoogle()}
-            >
-              Continue with Google
-            </Button>
-
-            <div className={styles.divider}>
-              <span>or</span>
-            </div>
-
-            <div className={styles.inputGroup}>
-              <label>Full Name</label>
-              <input
-                type="text"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleChange}
-                placeholder="John Doe"
-                required
-              />
-            </div>
-
-            <div className={styles.inputGroup}>
-              <label>Email</label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="you@example.com"
-                required
-              />
-            </div>
-
-            <div className={styles.row}>
-              <div className={styles.inputGroup}>
-                <label>Password</label>
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="••••••••"
-                  required
-                />
+      {signupSuccess ? (
+        <div className={styles.container}>
+          <div className={styles.card}>
+            <div className={styles.header}>
+              <div className={styles.logo}>
+                <img src={logo} alt="finely logo" onClick={() => navigate("/")} />
               </div>
+              <h1>Check your email</h1>
+              <p>We've sent a verification link to {formData.email}</p>
+            </div>
 
-              <div className={styles.inputGroup}>
-                <label>Confirm Password</label>
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  placeholder="••••••••"
-                  required
-                />
+            <div className={styles.successContent}>
+              <p>
+                Click the link in that email to verify your account. After verification,
+                you'll be directed to set up your account.
+              </p>
+              <div className={styles.actions}>
+                <Button
+                  variant="primary"
+                  size="large"
+                  fullWidth
+                  onClick={() => {
+                    setSignupSuccess(false);
+                    navigate("/signin");
+                  }}
+                >
+                  Back to Sign In
+                </Button>
               </div>
             </div>
-
-            <Button size="large" fullWidth type="submit" saving={isLoading}>
-              Create account
-            </Button>
-          </form>
-
-          <div className={styles.footer}>
-            <p>
-              Already have an account?{" "}
-              <span onClick={() => navigate("/signin")}>Sign in</span>
-            </p>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className={styles.container}>
+          <div className={styles.card}>
+            <div className={styles.header}>
+              <div className={styles.logo}>
+                <img src={logo} alt="finely logo" onClick={() => navigate("/")} />
+              </div>
+              <h1>Create account</h1>
+              <p>Start managing your finances today</p>
+            </div>
+
+            <form className={styles.form} onSubmit={handleSubmit}>
+              <Button
+                variant="primary"
+                size="large"
+                fullWidth
+                type="button"
+                icon={<FontAwesomeIcon icon={faGoogle} />}
+                onClick={() => loginWithGoogle()}
+              >
+                Continue with Google
+              </Button>
+
+              <div className={styles.divider}>
+                <span>or</span>
+              </div>
+
+              <div className={styles.inputGroup}>
+                <label>Full Name</label>
+                <input
+                  type="text"
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  placeholder="John Doe"
+                  required
+                />
+              </div>
+
+              <div className={styles.inputGroup}>
+                <label>Email</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="you@example.com"
+                  required
+                />
+              </div>
+
+              <div className={styles.row}>
+                <div className={styles.inputGroup}>
+                  <label>Password</label>
+                  <input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="••••••••"
+                    required
+                  />
+                </div>
+
+                <div className={styles.inputGroup}>
+                  <label>Confirm Password</label>
+                  <input
+                    type="password"
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    placeholder="••••••••"
+                    required
+                  />
+                </div>
+              </div>
+
+              <Button size="large" fullWidth type="submit" saving={isLoading}>
+                Create account
+              </Button>
+            </form>
+
+            <div className={styles.footer}>
+              <p>
+                Already have an account?{" "}
+                <span onClick={() => navigate("/signin")}>Sign in</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

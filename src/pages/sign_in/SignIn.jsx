@@ -54,15 +54,17 @@ export default function SignIn() {
       });
 
       const { token } = response.data;
-      const { firstName, lastName, email } = parseJwt(token);
-
       localStorage.setItem("token", token);
-      localStorage.setItem("finely-user", JSON.stringify({
-        name: [firstName, lastName].filter(Boolean).join(" "),
-        email: email || "",
-      }));
 
-      navigate("/dashboard");
+      // Fetch user profile to check email verification status
+      const { data: user } = await api.get("/auth/me");
+      localStorage.setItem("finely-user", JSON.stringify(user));
+
+      if (!user.emailVerified) {
+        navigate("/verify-email");
+      } else {
+        navigate("/setup");
+      }
     } catch (err) {
       setModal({
         isOpen: true,
@@ -83,15 +85,14 @@ export default function SignIn() {
         });
 
         const { token } = response.data;
-        const { firstName, lastName, email } = parseJwt(token);
-
         localStorage.setItem("token", token);
-        localStorage.setItem("finely-user", JSON.stringify({
-          name: [firstName, lastName].filter(Boolean).join(" "),
-          email: email || "",
-        }));
 
-        navigate("/dashboard");
+        // Fetch user profile (Google users are automatically verified)
+        const { data: user } = await api.get("/auth/me");
+        localStorage.setItem("finely-user", JSON.stringify(user));
+
+        // Google users are automatically verified, so go to setup page
+        navigate("/setup");
       } catch (err) {
         setModal({
           isOpen: true,

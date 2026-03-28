@@ -10,15 +10,30 @@ const router = express.Router();
 const VALID_COLORS = ["slate", "indigo", "emerald", "rose", "amber", "violet"];
 
 function mapPlaidCategory(pfcPrimary, legacyCategories = []) {
-  const src = (pfcPrimary || legacyCategories[0] || "").toLowerCase();
-  if (/food|restaurant|grocery|dining|eat/.test(src))          return "Food";
-  if (/transport|travel|taxi|uber|lyft|gas|fuel/.test(src))    return "Transport";
-  if (/entertain|recreation|sport|game|movie|music/.test(src)) return "Entertainment";
-  if (/utilities|utility|electric|water|internet|phone/.test(src)) return "Utilities";
-  if (/health|medical|pharmacy|hospital|doctor/.test(src))     return "Health";
-  if (/education|school|tuition|university/.test(src))         return "Education";
-  if (/clothing|apparel|fashion|shoe/.test(src))               return "Clothing";
-  if (/income|payroll|salary|deposit|transfer in/.test(src))   return "Income";
+  const primary = (pfcPrimary || "").toLowerCase().replace(/_/g, ' ');
+  const legacy = (legacyCategories[0] || "").toLowerCase();
+  const src = primary || legacy;
+
+  if (/income|payroll|salary|deposit|transfer in|payment received|refund|rebate|tax refund|interest/.test(src)) return "Income";
+  if (/utilities?|electric|water|gas bill|internet|phone|telecom|cable|tv|streaming/.test(src)) return "Utilities";
+  if (/subscription/.test(src)) return "Subscriptions";
+  if (/transport|travel|taxi|uber|lyft|gas|fuel|parking|toll|bridge|ferry|bus|train|transit|airline|flight|hotel|lodging|rental car|vehicle/.test(src)) return "Transport";
+  if (/entertain|recreation|sport|game|movie|music|theater|concert|amus|hobby|leisure|fitness|gym|sports/.test(src)) return "Entertainment";
+  if (/health|medical|pharmacy|hospital|doctor|dental|dentist|vision|optometrist|wellness|therapy|counseling/.test(src)) return "Health";
+  if (/education|school|tuition|university|college|books|textbook|coursera|udemy|learning|training/.test(src)) return "Education";
+  if (/clothing|apparel|fashion|shoe|shoes|accessory|jewelry|watch|department store|retail|mall|shopping/.test(src)) return "Shopping";
+  if (/transfer|bank fee|atm|withdrawal|deposit|wire|ach|bank service|account transfer/.test(src)) return "Transfer";
+  if (/beauty|salon|spa|hair|nail|cosmetic|barber|personal care|grooming/.test(src)) return "Personal Care";
+  if (/tax|taxes|irs|estimated tax/.test(src)) return "Taxes";
+  if (/insurance|premium|auto insurance|health insurance|life insurance|homeowner|renter insurance/.test(src)) return "Insurance";
+  if (/donation|charity|nonprofit|church|religious|giving|fundraiser|crowd|go fund/.test(src)) return "Donations";
+  if (/business|professional|consulting|legal|attorney|lawyer|accounting|tax service|office supply/.test(src)) return "Business";
+  if (/pet|dog|cat|animal|vet|veterinarian|pet supply/.test(src)) return "Pets";
+  if (/childcare|daycare|baby|child|school|tutor|after school|child support/.test(src)) return "Childcare";
+  if (/rent|apartment|home|housing|maintenance|repair|furniture|decor|lawn|garden|tool|mortgage/.test(src)) return "Housing";
+  if (/services/.test(src)) return "Services";
+  if (/loan|invest|stock|bond|crypto|bitcoin|dividend|credit card payment|payment finance/.test(src)) return "Financial";
+
   return "Other";
 }
 

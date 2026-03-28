@@ -4,7 +4,10 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: false },
   firstName: String,
-  lastName: String
+  lastName: String,
+  emailVerified: { type: Boolean, default: false },
+  verificationToken: String,
+  verificationTokenExpires: Date
 });
 
 const User = mongoose.model("User", userSchema);
