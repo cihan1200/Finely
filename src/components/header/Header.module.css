@@ -97,7 +97,9 @@
   border-radius: var(--radius-xl);
   background-color: var(--color-primary);
   border: 1px solid var(--color-primary);
-  transition: background-color var(--transition-fast), transform var(--transition-fast);
+  transition:
+    background-color var(--transition-fast),
+    transform var(--transition-fast);
   cursor: pointer;
 }
 
@@ -118,7 +120,9 @@
   padding: var(--p-btn-md);
   border-radius: var(--radius-xl);
   cursor: pointer;
-  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  transition:
+    opacity var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .ctaLogout:hover {
@@ -137,7 +141,9 @@
   display: flex;
   align-items: center;
   padding: 3px;
-  transition: background-color var(--transition-normal), border-color var(--transition-normal);
+  transition:
+    background-color var(--transition-normal),
+    border-color var(--transition-normal);
   flex-shrink: 0;
 }
 
@@ -189,7 +195,10 @@
   color: var(--text-secondary);
   cursor: pointer;
   font-size: var(--text-base);
-  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast),
+    border-color var(--transition-fast);
 }
 
 .menuBtn:hover {
@@ -210,8 +219,14 @@
 }
 
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .mobileNav {
@@ -228,7 +243,9 @@
   text-decoration: none;
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-md);
-  transition: background-color var(--transition-fast), color var(--transition-fast);
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
 }
 
 .mobileNavLink:hover {
@@ -255,7 +272,9 @@
   font-size: var(--text-sm);
   font-weight: var(--weight-medium);
   text-decoration: none;
-  transition: background-color var(--transition-fast), color var(--transition-fast);
+  transition:
+    background-color var(--transition-fast),
+    color var(--transition-fast);
 }
 
 .mobileCtaLogin:hover {
