@@ -1,30 +1,22 @@
-import nodemailer from "nodemailer";
+import { Resend } from 'resend';
 import dotenv from "dotenv";
 
 dotenv.config();
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: parseInt(process.env.SMTP_PORT) || 587,
-  secure: false, // true for 465, false for other ports
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 /**
- * Sends a verification email to the user
+ * Sends a verification email to the user using Resend
  * @param {Object} user - User document with email, firstName, lastName
  * @param {string} verificationToken - The verification token
  */
 export async function sendVerificationEmail(user, verificationToken) {
   const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
 
-  const mailOptions = {
-    from: `"Finely" <${process.env.SMTP_USER}>`,
-    to: user.email,
-    subject: "Verify your email address",
+  const { data, error } = await resend.emails.send({
+    from: process.env.RESEND_FROM_EMAIL || 'Finely <noreply@resend.dev>',
+    to: [user.email],
+    subject: 'Verify your email address',
     html: `
       <!DOCTYPE html>
       <html>
@@ -64,11 +56,15 @@ export async function sendVerificationEmail(user, verificationToken) {
         </body>
       </html>
     `,
-  };
+  });
 
-  const info = await transporter.sendMail(mailOptions);
-  console.log(`Verification email sent to ${user.email}: ${info.messageId}`);
-  return info;
+  if (error) {
+    console.error('Failed to send verification email:', error);
+    throw error;
+  }
+
+  console.log(`Verification email sent to ${user.email}: ${data.id}`);
+  return data;
 }
 
 export default { sendVerificationEmail };
