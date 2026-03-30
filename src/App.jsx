@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { useState, useEffect } from "react";
+import { Analytics } from "@vercel/analytics/react";
 import Home from "./pages/home/Home";
 import SignIn from "./pages/sign_in/SignIn";
 import SignUp from "./pages/sign_up/SignUp";
@@ -64,6 +65,7 @@ export default function App() {
           <Route path="/exports" element={<ExportPage />} />
         </Route>
       </Routes>
+      <Analytics />
     </BrowserRouter>
   );
 }
