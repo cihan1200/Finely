@@ -196,7 +196,7 @@ router.get("/verify-email/:token", async (req, res) => {
         emailVerified: user.emailVerified,
         setupComplete: user.setupComplete || false,
       },
-      redirectUrl: `${process.env.FRONTEND_URL}/setup`
+      redirectUrl: "/setup"
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
