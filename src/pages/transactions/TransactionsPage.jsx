@@ -176,7 +176,7 @@ export default function TransactionsPage() {
   const handleCardSync = async (cardId) => {
     setCardSyncing(cardId);
     try {
-      await api.post(`/plaid/sync/${cardId}`);
+      await api.post(`/plaid/sync/${cardId}/reset`);
       await refreshTransactions();
     } catch (err) {
       console.error('Sync error:', err.response?.data || err.message);

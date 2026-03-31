@@ -141,7 +141,7 @@ export default function Setup() {
 
               <button
                 onClick={handleConnectBank}
-                disabled={tokenLoading || saving || !plaidReady}
+                disabled={tokenLoading || saving}
                 className={styles.connectBtn}
               >
                 {tokenLoading || saving ? (

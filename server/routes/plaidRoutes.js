@@ -63,27 +63,51 @@ async function syncCardTransactions(card) {
   let added   = [];
   let removed = [];
   let hasMore = true;
+  let syncCalls = 0;
 
-  while (hasMore) {
-    const response = await plaidClient.transactionsSync({
-      access_token: fullCard.plaidAccessToken,
-      cursor,
-      count: 100,
-    });
-    added   = added.concat(response.data.added);
-    removed = removed.concat(response.data.removed);
-    hasMore = response.data.has_more;
-    cursor  = response.data.next_cursor;
+  while (hasMore && syncCalls < 10) { // Safety limit to prevent infinite loops
+    syncCalls++;
+    try {
+      const response = await plaidClient.transactionsSync({
+        access_token: fullCard.plaidAccessToken,
+        cursor,
+        count: 100,
+      });
+
+      // Ensure we're working with arrays
+      const addedTx = Array.isArray(response.data.added) ? response.data.added : [];
+      const removedTx = Array.isArray(response.data.removed) ? response.data.removed : [];
+
+      added   = added.concat(addedTx);
+      removed = removed.concat(removedTx);
+      hasMore = response.data.has_more === true;
+      cursor  = response.data.next_cursor || null;
+    } catch (err) {
+      console.error("Error in transactionsSync call:", err);
+      break; // Exit loop on error
+    }
   }
 
   let newCount = 0;
+  let failCount = 0;
   for (const plaidTx of added) {
     try {
       await Transaction.create(plaidTxToOurTx({ plaidTx, userId: fullCard.userId, cardId: fullCard._id }));
       newCount++;
     } catch (err) {
-      if (err.code !== 11000) throw err;
+      if (err.code === 11000) {
+        // Duplicate key - ignore
+        continue;
+      } else {
+        console.error("Failed to create transaction:", err);
+        failCount++;
+        // Continue processing other transactions
+      }
     }
+  }
+
+  if (failCount > 0) {
+    console.warn(`Failed to create ${failCount} transactions during sync`);
   }
 
   if (removed.length > 0) {
@@ -93,6 +117,21 @@ async function syncCardTransactions(card) {
 
   await Card.findByIdAndUpdate(fullCard._id, { plaidCursor: cursor });
   return newCount;
+}
+
+async function fullResyncCard(card) {
+  const fullCard = await Card.findById(card._id).select("+plaidAccessToken +plaidCursor");
+  if (!fullCard?.plaidAccessToken) return 0;
+
+  // Reset cursor so Plaid sends all transactions from the beginning
+  await Card.findByIdAndUpdate(fullCard._id, { plaidCursor: null });
+  fullCard.plaidCursor = undefined;
+
+  // Remove all previously synced Plaid transactions for this card
+  await Transaction.deleteMany({ cardId: fullCard._id, source: "plaid" });
+
+  // Now run a normal sync from scratch
+  return syncCardTransactions({ _id: fullCard._id });
 }
 
 router.post("/link-token", verifyToken, async (req, res) => {
@@ -166,6 +205,24 @@ router.post("/exchange", verifyToken, async (req, res) => {
   }
 });
 
+router.post("/sync/:cardId/reset", verifyToken, async (req, res) => {
+  try {
+    const card = await Card.findById(req.params.cardId);
+    if (!card)                                  return res.status(404).json({ message: "Card not found." });
+    if (card.userId.toString() !== req.user.id) return res.status(403).json({ message: "Unauthorized." });
+    if (!card.plaidItemId)                      return res.status(400).json({ message: "Not a Plaid card." });
+
+    const newCount = await fullResyncCard(card);
+    res.status(200).json({
+      message:             `Full resync complete. ${newCount} transaction${newCount !== 1 ? "s" : ""} imported.`,
+      newTransactionCount: newCount,
+    });
+  } catch (error) {
+    console.error("Full resync error:", error.response?.data || error.message);
+    res.status(500).json({ message: "Failed to reset and resync." });
+  }
+});
+
 router.post("/sync/:cardId", verifyToken, async (req, res) => {
   try {
     const card = await Card.findById(req.params.cardId);
@@ -199,6 +256,23 @@ router.post("/webhook", async (req, res) => {
     } catch (err) {
       console.error("Webhook sync error:", err.message);
     }
+  }
+});
+
+router.post("/sandbox/fire/:cardId", verifyToken, async (req, res) => {
+  try {
+    const card = await Card.findById(req.params.cardId).select("+plaidAccessToken");
+    if (!card)                                  return res.status(404).json({ message: "Card not found." });
+    if (card.userId.toString() !== req.user.id) return res.status(403).json({ message: "Unauthorized." });
+
+    await plaidClient.sandboxItemFireWebhook({
+      access_token: card.plaidAccessToken,
+      webhook_code: "SYNC_UPDATES_AVAILABLE",
+    });
+    res.status(200).json({ message: "Sandbox webhook fired." });
+  } catch (err) {
+    console.error("Sandbox fire error:", err.response?.data || err.message);
+    res.status(500).json({ message: err.response?.data?.error_message || err.message });
   }
 });
 
