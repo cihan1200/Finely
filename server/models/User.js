@@ -7,7 +7,8 @@ const userSchema = new mongoose.Schema({
   lastName: String,
   emailVerified: { type: Boolean, default: false },
   verificationToken: String,
-  verificationTokenExpires: Date
+  verificationTokenExpires: Date,
+  setupComplete: { type: Boolean, default: false }
 });
 
 const User = mongoose.model("User", userSchema);

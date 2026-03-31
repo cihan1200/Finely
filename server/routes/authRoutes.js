@@ -248,7 +248,7 @@ router.get("/me", async (req, res) => {
   try {
     // This route is protected by verifyToken middleware (to be added)
     // Will be handled by ProtectedRoute in the app - but we can add a simple check
-    const token = req.header("Authorization");
+    let token = req.header("Authorization");
 
     if (!token) {
       return res.status(401).json({ message: "No token provided" });
@@ -287,7 +287,7 @@ router.get("/me", async (req, res) => {
 // PATCH /auth/setup-complete - Mark setup as complete
 router.patch("/setup-complete", async (req, res) => {
   try {
-    const token = req.header("Authorization");
+    let token = req.header("Authorization");
 
     if (!token) {
       return res.status(401).json({ message: "No token provided" });

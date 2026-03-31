@@ -11,12 +11,14 @@ export default function VerifyEmail() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    checkVerificationStatus();
-    // Check URL for token (if user clicked verification link)
+    // Check URL for token first (if user clicked verification link)
     const token = new URLSearchParams(window.location.search).get("token");
     if (token) {
       verifyEmail(token);
+      return;
     }
+    // If no token, check verification status
+    checkVerificationStatus();
   }, []);
 
   const checkVerificationStatus = async () => {
