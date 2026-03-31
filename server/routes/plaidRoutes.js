@@ -11,7 +11,7 @@ const VALID_COLORS = ["slate", "indigo", "emerald", "rose", "amber", "violet"];
 
 function mapPlaidCategory(pfcPrimary, legacyCategories = []) {
   const primary = (pfcPrimary || "").toLowerCase().replace(/_/g, ' ');
-  const legacy = (legacyCategories[0] || "").toLowerCase();
+  const legacy = (legacyCategories?.[0] || "").toLowerCase(); 
   const src = primary || legacy;
 
   if (/income|payroll|salary|deposit|transfer in|payment received|refund|rebate|tax refund|interest/.test(src)) return "Income";
