@@ -7,7 +7,7 @@ import SignUp from "./pages/sign_up/SignUp";
 import Dashboard from "./pages/dashboard/Dashboard";
 import VerifyEmail from "./pages/verify_email/VerifyEmail";
 import Setup from "./pages/setup/Setup";
-import TransactionsPage from './pages/transactions/TransactionsPage';
+import TransactionsPage from "./pages/transactions/TransactionsPage";
 import AnalyticsPage from "./pages/analytics/AnalyticsPage";
 import BudgetsPage from "./pages/budgets/BudgetsPage";
 import ServerWaking from "./pages/server_waking/ServerWaking";
@@ -17,12 +17,13 @@ import AIAssistant from "./components/ai_assistant/AIAssistant";
 
 export default function App() {
   const [isServerAwake, setIsServerAwake] = useState(
-    () => sessionStorage.getItem("serverAwake") === "true"
+    () => sessionStorage.getItem("serverAwake") === "true",
   );
 
-  // Check if we're on production (Vercel) and not on localhost
   const isProduction = import.meta.env.PROD;
-  const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  const isLocalhost =
+    window.location.hostname === "localhost" ||
+    window.location.hostname === "127.0.0.1";
   const shouldShowServerWakeup = isProduction && !isLocalhost;
 
   useEffect(() => {
@@ -43,7 +44,7 @@ export default function App() {
 
     wakeUpServer();
   }, [isServerAwake, shouldShowServerWakeup]);
-  
+
   if (shouldShowServerWakeup && !isServerAwake) {
     return <ServerWaking />;
   }

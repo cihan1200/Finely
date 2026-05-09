@@ -9,7 +9,7 @@ import Button from "../../components/button/Button";
 import Message from "../../components/message/Message";
 import { useTheme } from "../../contexts/ThemeContext";
 import { useNavigate } from "react-router-dom";
-import { useGoogleLogin } from '@react-oauth/google';
+import { useGoogleLogin } from "@react-oauth/google";
 
 function parseJwt(token) {
   try {
@@ -30,7 +30,7 @@ export default function SignIn() {
   const [modal, setModal] = useState({
     isOpen: false,
     message: "",
-    variant: "notify"
+    variant: "notify",
   });
 
   const [formData, setFormData] = useState({
@@ -56,20 +56,16 @@ export default function SignIn() {
       const { token } = response.data;
       localStorage.setItem("token", token);
 
-      // Fetch user profile to check email verification status
       const { data: user } = await api.get("/auth/me");
       localStorage.setItem("finely-user", JSON.stringify(user));
 
-      if (!user.emailVerified) {
-        navigate("/verify-email");
-      } else {
-        navigate("/setup");
-      }
+      navigate("/dashboard");
     } catch (err) {
       setModal({
         isOpen: true,
-        message: err.response?.data?.message || err.message || "Something went wrong",
-        variant: "error"
+        message:
+          err.response?.data?.message || err.message || "Something went wrong",
+        variant: "error",
       });
     } finally {
       setIsLoading(false);
@@ -87,25 +83,29 @@ export default function SignIn() {
         const { token } = response.data;
         localStorage.setItem("token", token);
 
-        // Fetch user profile (Google users are automatically verified)
+        // Fetch user profile
         const { data: user } = await api.get("/auth/me");
         localStorage.setItem("finely-user", JSON.stringify(user));
 
-        // Google users are automatically verified, so go to setup page
-        navigate("/setup");
+        navigate("/dashboard");
       } catch (err) {
         setModal({
           isOpen: true,
-          message: err.response?.data?.message || "Google authentication failed",
-          variant: "error"
+          message:
+            err.response?.data?.message || "Google authentication failed",
+          variant: "error",
         });
       } finally {
         setIsLoading(false);
       }
     },
     onError: () => {
-      setModal({ isOpen: true, message: "Google login was cancelled or failed", variant: "error" });
-    }
+      setModal({
+        isOpen: true,
+        message: "Google login was cancelled or failed",
+        variant: "error",
+      });
+    },
   });
 
   return (
@@ -185,7 +185,8 @@ export default function SignIn() {
 
           <div className={styles.footer}>
             <p>
-              Don't have an account? <span onClick={() => navigate("/signup")}>Sign up</span>
+              Don't have an account?{" "}
+              <span onClick={() => navigate("/signup")}>Sign up</span>
             </p>
           </div>
         </div>

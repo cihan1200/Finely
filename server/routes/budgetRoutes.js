@@ -12,24 +12,22 @@ router.get("/", verifyToken, async (req, res) => {
   try {
     const budgets = await Budget.find({ userId: req.user.id });
 
-    const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-
+    // FIX: Removed the monthStart/monthEnd filters so historical
+    // synced Plaid transactions accurately aggregate into the budgets.
     const spentByCategory = await Transaction.aggregate([
       {
         $match: {
           userId: new mongoose.Types.ObjectId(req.user.id),
           sign: "expense",
-          date: { $gte: monthStart, $lt: monthEnd }
-        }
+        },
       },
       {
         $group: {
-          _id: "$category",
-          total: { $sum: "$amount" }
-        }
-      }
+          // FIX: Convert all categories to lowercase to prevent "Food" vs "food" mapping failures
+          _id: { $toLower: "$category" },
+          total: { $sum: "$amount" },
+        },
+      },
     ]);
 
     const spentMap = {};
@@ -44,12 +42,15 @@ router.get("/", verifyToken, async (req, res) => {
       icon: b.icon,
       color: b.color,
       limit: b.limit,
-      spent: spentMap[b.category] ?? 0
+      // Ensure we check against the lowercase version of the budget's category
+      spent: spentMap[(b.category || "").toLowerCase()] ?? 0,
     }));
 
     res.status(200).json(result);
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch budgets", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to fetch budgets", error: error.message });
   }
 });
 
@@ -59,14 +60,32 @@ router.post("/", verifyToken, async (req, res) => {
 
     const existing = await Budget.findOne({ userId: req.user.id, category });
     if (existing) {
-      return res.status(409).json({ message: "Budget for this category already exists" });
+      return res
+        .status(409)
+        .json({ message: "Budget for this category already exists" });
     }
 
-    if (!limit || isNaN(Number(limit)) || Number(limit) <= 0 || Number(limit) > MAX_LIMIT) {
-      return res.status(400).json({ message: `Limit must be between $1 and $${MAX_LIMIT.toLocaleString()}.` });
+    if (
+      !limit ||
+      isNaN(Number(limit)) ||
+      Number(limit) <= 0 ||
+      Number(limit) > MAX_LIMIT
+    ) {
+      return res
+        .status(400)
+        .json({
+          message: `Limit must be between $1 and $${MAX_LIMIT.toLocaleString()}.`,
+        });
     }
 
-    const budget = new Budget({ userId: req.user.id, label, category, icon, color, limit });
+    const budget = new Budget({
+      userId: req.user.id,
+      label,
+      category,
+      icon,
+      color,
+      limit,
+    });
     const saved = await budget.save();
 
     res.status(201).json({
@@ -76,10 +95,12 @@ router.post("/", verifyToken, async (req, res) => {
       icon: saved.icon,
       color: saved.color,
       limit: saved.limit,
-      spent: 0
+      spent: 0,
     });
   } catch (error) {
-    res.status(400).json({ message: "Failed to create budget", error: error.message });
+    res
+      .status(400)
+      .json({ message: "Failed to create budget", error: error.message });
   }
 });
 
@@ -93,8 +114,17 @@ router.put("/:id", verifyToken, async (req, res) => {
     }
 
     const { limit } = req.body;
-    if (!limit || isNaN(Number(limit)) || Number(limit) <= 0 || Number(limit) > MAX_LIMIT) {
-      return res.status(400).json({ message: `Limit must be between $1 and $${MAX_LIMIT.toLocaleString()}.` });
+    if (
+      !limit ||
+      isNaN(Number(limit)) ||
+      Number(limit) <= 0 ||
+      Number(limit) > MAX_LIMIT
+    ) {
+      return res
+        .status(400)
+        .json({
+          message: `Limit must be between $1 and $${MAX_LIMIT.toLocaleString()}.`,
+        });
     }
 
     budget.limit = Number(limit);
@@ -102,7 +132,9 @@ router.put("/:id", verifyToken, async (req, res) => {
 
     res.status(200).json({ id: budget._id, limit: budget.limit });
   } catch (error) {
-    res.status(500).json({ message: "Failed to update budget", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to update budget", error: error.message });
   }
 });
 
@@ -118,7 +150,9 @@ router.delete("/:id", verifyToken, async (req, res) => {
     await Budget.findByIdAndDelete(req.params.id);
     res.status(200).json({ message: "Budget deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Failed to delete budget", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Failed to delete budget", error: error.message });
   }
 });
 

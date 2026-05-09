@@ -7,11 +7,11 @@ const transactionSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    label:    { type: String, required: true },
+    label: { type: String, required: true },
     category: { type: String, required: true },
-    amount:   { type: Number, required: true },
-    sign:     { type: String, enum: ["income", "expense"], required: true },
-    date:     { type: Date, required: true },
+    amount: { type: Number, required: true },
+    sign: { type: String, enum: ["income", "expense"], required: true },
+    date: { type: Date, required: true },
 
     source: {
       type: String,
@@ -21,7 +21,8 @@ const transactionSchema = new mongoose.Schema(
 
     plaidTransactionId: {
       type: String,
-      default: null,
+      // FIX: Removed 'default: null'.
+      // If left undefined, the 'sparse' index correctly ignores it for manual transactions.
     },
 
     cardId: {
@@ -30,12 +31,12 @@ const transactionSchema = new mongoose.Schema(
       default: null,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 transactionSchema.index(
   { plaidTransactionId: 1 },
-  { unique: true, sparse: true }
+  { unique: true, sparse: true },
 );
 
 const Transaction = mongoose.model("Transaction", transactionSchema);

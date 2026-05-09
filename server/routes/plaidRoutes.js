@@ -10,104 +10,189 @@ const router = express.Router();
 const VALID_COLORS = ["slate", "indigo", "emerald", "rose", "amber", "violet"];
 
 function mapPlaidCategory(pfcPrimary, legacyCategories = []) {
-  const primary = (pfcPrimary || "").toLowerCase().replace(/_/g, ' ');
-  const legacy = (legacyCategories?.[0] || "").toLowerCase(); 
+  const primary = (pfcPrimary || "").toLowerCase().replace(/_/g, " ");
+  const legacy = (legacyCategories?.[0] || "").toLowerCase();
   const src = primary || legacy;
 
-  if (/income|payroll|salary|deposit|transfer in|payment received|refund|rebate|tax refund|interest/.test(src)) return "Income";
-  if (/utilities?|electric|water|gas bill|internet|phone|telecom|cable|tv|streaming/.test(src)) return "Utilities";
+  if (
+    /income|payroll|salary|deposit|transfer in|payment received|refund|rebate|tax refund|interest/.test(
+      src,
+    )
+  )
+    return "Income";
+  if (
+    /food|drink|dining|restaurant|cafe|coffee|grocery|groceries|bakery|supermarket|fast food|pizza|burger|sushi|deli|diner|bar|pub|meal|snack/.test(
+      src,
+    )
+  )
+    return "Food";
+  if (
+    /utilities?|electric|water|gas bill|internet|phone|telecom|cable|tv|streaming/.test(
+      src,
+    )
+  )
+    return "Utilities";
   if (/subscription/.test(src)) return "Subscriptions";
-  if (/transport|travel|taxi|uber|lyft|gas|fuel|parking|toll|bridge|ferry|bus|train|transit|airline|flight|hotel|lodging|rental car|vehicle/.test(src)) return "Transport";
-  if (/entertain|recreation|sport|game|movie|music|theater|concert|amus|hobby|leisure|fitness|gym|sports/.test(src)) return "Entertainment";
-  if (/health|medical|pharmacy|hospital|doctor|dental|dentist|vision|optometrist|wellness|therapy|counseling/.test(src)) return "Health";
-  if (/education|school|tuition|university|college|books|textbook|coursera|udemy|learning|training/.test(src)) return "Education";
-  if (/clothing|apparel|fashion|shoe|shoes|accessory|jewelry|watch|department store|retail|mall|shopping/.test(src)) return "Shopping";
-  if (/transfer|bank fee|atm|withdrawal|deposit|wire|ach|bank service|account transfer/.test(src)) return "Transfer";
-  if (/beauty|salon|spa|hair|nail|cosmetic|barber|personal care|grooming/.test(src)) return "Personal Care";
+  if (
+    /transport|travel|taxi|uber|lyft|gas|fuel|parking|toll|bridge|ferry|bus|train|transit|airline|flight|hotel|lodging|rental car|vehicle/.test(
+      src,
+    )
+  )
+    return "Transport";
+  if (
+    /entertain|recreation|sport|game|movie|music|theater|concert|amus|hobby|leisure|fitness|gym|sports/.test(
+      src,
+    )
+  )
+    return "Entertainment";
+  if (
+    /health|medical|pharmacy|hospital|doctor|dental|dentist|vision|optometrist|wellness|therapy|counseling/.test(
+      src,
+    )
+  )
+    return "Health";
+  if (
+    /education|school|tuition|university|college|books|textbook|coursera|udemy|learning|training/.test(
+      src,
+    )
+  )
+    return "Education";
+  if (
+    /clothing|apparel|fashion|shoe|shoes|accessory|jewelry|watch|department store|retail|mall|shopping/.test(
+      src,
+    )
+  )
+    return "Shopping";
+  if (
+    /transfer|bank fee|atm|withdrawal|deposit|wire|ach|bank service|account transfer/.test(
+      src,
+    )
+  )
+    return "Transfer";
+  if (
+    /beauty|salon|spa|hair|nail|cosmetic|barber|personal care|grooming/.test(
+      src,
+    )
+  )
+    return "Personal Care";
   if (/tax|taxes|irs|estimated tax/.test(src)) return "Taxes";
-  if (/insurance|premium|auto insurance|health insurance|life insurance|homeowner|renter insurance/.test(src)) return "Insurance";
-  if (/donation|charity|nonprofit|church|religious|giving|fundraiser|crowd|go fund/.test(src)) return "Donations";
-  if (/business|professional|consulting|legal|attorney|lawyer|accounting|tax service|office supply/.test(src)) return "Business";
+  if (
+    /insurance|premium|auto insurance|health insurance|life insurance|homeowner|renter insurance/.test(
+      src,
+    )
+  )
+    return "Insurance";
+  if (
+    /donation|charity|nonprofit|church|religious|giving|fundraiser|crowd|go fund/.test(
+      src,
+    )
+  )
+    return "Donations";
+  if (
+    /business|professional|consulting|legal|attorney|lawyer|accounting|tax service|office supply/.test(
+      src,
+    )
+  )
+    return "Business";
   if (/pet|dog|cat|animal|vet|veterinarian|pet supply/.test(src)) return "Pets";
-  if (/childcare|daycare|baby|child|school|tutor|after school|child support/.test(src)) return "Childcare";
-  if (/rent|apartment|home|housing|maintenance|repair|furniture|decor|lawn|garden|tool|mortgage/.test(src)) return "Housing";
+  if (
+    /childcare|daycare|baby|child|school|tutor|after school|child support/.test(
+      src,
+    )
+  )
+    return "Childcare";
+  if (
+    /rent|apartment|home|housing|maintenance|repair|furniture|decor|lawn|garden|tool|mortgage/.test(
+      src,
+    )
+  )
+    return "Housing";
   if (/services/.test(src)) return "Services";
-  if (/loan|invest|stock|bond|crypto|bitcoin|dividend|credit card payment|payment finance/.test(src)) return "Financial";
+  if (
+    /loan|invest|stock|bond|crypto|bitcoin|dividend|credit card payment|payment finance/.test(
+      src,
+    )
+  )
+    return "Financial";
 
   return "Other";
 }
 
 function plaidTxToOurTx({ plaidTx, userId, cardId }) {
   const isExpense = plaidTx.amount > 0;
-  const category  = isExpense
-    ? mapPlaidCategory(plaidTx.personal_finance_category?.primary, plaidTx.category)
+  const category = isExpense
+    ? mapPlaidCategory(
+        plaidTx.personal_finance_category?.primary,
+        plaidTx.category,
+      )
     : "Income";
   return {
     userId,
     cardId,
-    label:              plaidTx.merchant_name || plaidTx.name || "Unknown",
+    label: plaidTx.merchant_name || plaidTx.name || "Unknown",
     category,
-    amount:             Math.abs(plaidTx.amount),
-    sign:               isExpense ? "expense" : "income",
-    date:               new Date(plaidTx.date),
-    source:             "plaid",
+    amount: Math.abs(plaidTx.amount),
+    sign: isExpense ? "expense" : "income",
+    date: new Date(plaidTx.date),
+    source: "plaid",
     plaidTransactionId: plaidTx.transaction_id,
   };
 }
 
 async function syncCardTransactions(card) {
-  const fullCard = await Card.findById(card._id).select("+plaidAccessToken +plaidCursor");
+  const fullCard = await Card.findById(card._id).select(
+    "+plaidAccessToken +plaidCursor",
+  );
   if (!fullCard?.plaidAccessToken) return 0;
 
-  let cursor  = fullCard.plaidCursor || undefined;
-  let added   = [];
+  let cursor = fullCard.plaidCursor || undefined;
+  let added = [];
   let removed = [];
   let hasMore = true;
-  let syncCalls = 0;
 
-  while (hasMore && syncCalls < 10) { // Safety limit to prevent infinite loops
-    syncCalls++;
+  // FIXED: Loop runs as long as Plaid indicates more data is available
+  while (hasMore) {
     try {
       const response = await plaidClient.transactionsSync({
         access_token: fullCard.plaidAccessToken,
         cursor,
-        count: 100,
+        count: 500, // Increased count to fetch more per request
       });
 
-      // Ensure we're working with arrays
-      const addedTx = Array.isArray(response.data.added) ? response.data.added : [];
-      const removedTx = Array.isArray(response.data.removed) ? response.data.removed : [];
+      const addedTx = Array.isArray(response.data.added)
+        ? response.data.added
+        : [];
+      const removedTx = Array.isArray(response.data.removed)
+        ? response.data.removed
+        : [];
 
-      added   = added.concat(addedTx);
+      added = added.concat(addedTx);
       removed = removed.concat(removedTx);
-      hasMore = response.data.has_more === true;
-      cursor  = response.data.next_cursor || null;
+
+      hasMore = response.data.has_more; // Keep looping if true
+      cursor = response.data.next_cursor; // Update cursor for the next iteration
     } catch (err) {
       console.error("Error in transactionsSync call:", err);
-      break; // Exit loop on error
+      break;
     }
   }
 
   let newCount = 0;
-  let failCount = 0;
   for (const plaidTx of added) {
     try {
-      await Transaction.create(plaidTxToOurTx({ plaidTx, userId: fullCard.userId, cardId: fullCard._id }));
+      await Transaction.create(
+        plaidTxToOurTx({
+          plaidTx,
+          userId: fullCard.userId,
+          cardId: fullCard._id,
+        }),
+      );
       newCount++;
     } catch (err) {
-      if (err.code === 11000) {
-        // Duplicate key - ignore
-        continue;
-      } else {
+      if (err.code !== 11000) {
         console.error("Failed to create transaction:", err);
-        failCount++;
-        // Continue processing other transactions
       }
     }
-  }
-
-  if (failCount > 0) {
-    console.warn(`Failed to create ${failCount} transactions during sync`);
   }
 
   if (removed.length > 0) {
@@ -115,37 +200,38 @@ async function syncCardTransactions(card) {
     await Transaction.deleteMany({ plaidTransactionId: { $in: removedIds } });
   }
 
+  // Save the latest cursor so the next sync starts where we left off
   await Card.findByIdAndUpdate(fullCard._id, { plaidCursor: cursor });
   return newCount;
 }
 
 async function fullResyncCard(card) {
-  const fullCard = await Card.findById(card._id).select("+plaidAccessToken +plaidCursor");
+  const fullCard = await Card.findById(card._id).select(
+    "+plaidAccessToken +plaidCursor",
+  );
   if (!fullCard?.plaidAccessToken) return 0;
 
-  // Reset cursor so Plaid sends all transactions from the beginning
   await Card.findByIdAndUpdate(fullCard._id, { plaidCursor: null });
-  fullCard.plaidCursor = undefined;
-
-  // Remove all previously synced Plaid transactions for this card
   await Transaction.deleteMany({ cardId: fullCard._id, source: "plaid" });
 
-  // Now run a normal sync from scratch
   return syncCardTransactions({ _id: fullCard._id });
 }
 
 router.post("/link-token", verifyToken, async (req, res) => {
   try {
     const response = await plaidClient.linkTokenCreate({
-      user:          { client_user_id: req.user.id },
-      client_name:   process.env.APP_NAME || "Finance App",
-      products:      [Products.Transactions],
+      user: { client_user_id: req.user.id },
+      client_name: process.env.APP_NAME || "Finance App",
+      products: [Products.Transactions],
       country_codes: [CountryCode.Us],
-      language:      "en",
+      language: "en",
     });
     res.status(200).json({ link_token: response.data.link_token });
   } catch (error) {
-    console.error("Plaid link-token error:", error.response?.data || error.message);
+    console.error(
+      "Plaid link-token error:",
+      error.response?.data || error.message,
+    );
     res.status(500).json({ message: "Failed to create Plaid link token." });
   }
 });
@@ -154,34 +240,46 @@ router.post("/exchange", verifyToken, async (req, res) => {
   try {
     const { publicToken, metadata, color, colorFrom, colorTo } = req.body;
 
-    if (!publicToken)                return res.status(400).json({ message: "publicToken is required." });
-    if (!VALID_COLORS.includes(color)) return res.status(400).json({ message: "Invalid color selection." });
+    if (!publicToken)
+      return res.status(400).json({ message: "publicToken is required." });
+    if (!VALID_COLORS.includes(color))
+      return res.status(400).json({ message: "Invalid color selection." });
 
     const existing = await Card.countDocuments({ userId: req.user.id });
-    if (existing >= 3) return res.status(400).json({ message: "You can connect a maximum of 3 cards." });
+    if (existing >= 3)
+      return res
+        .status(400)
+        .json({ message: "You can connect a maximum of 3 cards." });
 
-    const exchangeRes = await plaidClient.itemPublicTokenExchange({ public_token: publicToken });
+    const exchangeRes = await plaidClient.itemPublicTokenExchange({
+      public_token: publicToken,
+    });
     const accessToken = exchangeRes.data.access_token;
-    const itemId      = exchangeRes.data.item_id;
+    const itemId = exchangeRes.data.item_id;
 
-    const accountsRes = await plaidClient.accountsGet({ access_token: accessToken });
-    const account     = accountsRes.data.accounts[0];
+    const accountsRes = await plaidClient.accountsGet({
+      access_token: accessToken,
+    });
+    const account = accountsRes.data.accounts[0];
     const institution = metadata?.institution?.name || "Bank";
 
     const card = new Card({
-      userId:           req.user.id,
-      color, colorFrom, colorTo,
-      cardholderName:   institution,
-      lastFour:         account?.mask || "????",
-      bank:             institution,
-      cardType:         account?.subtype || account?.type || "account",
+      userId: req.user.id,
+      color,
+      colorFrom,
+      colorTo,
+      cardholderName: institution,
+      lastFour: account?.mask || "????",
+      bank: institution,
+      cardType: account?.subtype || account?.type || "account",
       plaidAccessToken: accessToken,
-      plaidItemId:      itemId,
-      plaidAccountId:   account?.account_id,
+      plaidItemId: itemId,
+      plaidAccountId: account?.account_id,
     });
 
     const saved = await card.save();
 
+    // Initial sync now uses the updated logic to fetch all pages
     try {
       await syncCardTransactions(saved);
     } catch (syncErr) {
@@ -189,18 +287,21 @@ router.post("/exchange", verifyToken, async (req, res) => {
     }
 
     res.status(201).json({
-      id:             saved._id,
+      id: saved._id,
       cardholderName: saved.cardholderName,
-      lastFour:       saved.lastFour,
-      bank:           saved.bank,
-      cardType:       saved.cardType,
-      color:          saved.color,
-      colorFrom:      saved.colorFrom,
-      colorTo:        saved.colorTo,
-      connectedAt:    saved.createdAt,
+      lastFour: saved.lastFour,
+      bank: saved.bank,
+      cardType: saved.cardType,
+      color: saved.color,
+      colorFrom: saved.colorFrom,
+      colorTo: saved.colorTo,
+      connectedAt: saved.createdAt,
     });
   } catch (error) {
-    console.error("Plaid exchange error:", error.response?.data || error.message);
+    console.error(
+      "Plaid exchange error:",
+      error.response?.data || error.message,
+    );
     res.status(500).json({ message: "Failed to connect card via Plaid." });
   }
 });
@@ -208,13 +309,15 @@ router.post("/exchange", verifyToken, async (req, res) => {
 router.post("/sync/:cardId/reset", verifyToken, async (req, res) => {
   try {
     const card = await Card.findById(req.params.cardId);
-    if (!card)                                  return res.status(404).json({ message: "Card not found." });
-    if (card.userId.toString() !== req.user.id) return res.status(403).json({ message: "Unauthorized." });
-    if (!card.plaidItemId)                      return res.status(400).json({ message: "Not a Plaid card." });
+    if (!card) return res.status(404).json({ message: "Card not found." });
+    if (card.userId.toString() !== req.user.id)
+      return res.status(403).json({ message: "Unauthorized." });
+    if (!card.plaidItemId)
+      return res.status(400).json({ message: "Not a Plaid card." });
 
     const newCount = await fullResyncCard(card);
     res.status(200).json({
-      message:             `Full resync complete. ${newCount} transaction${newCount !== 1 ? "s" : ""} imported.`,
+      message: `Full resync complete. ${newCount} transaction${newCount !== 1 ? "s" : ""} imported.`,
       newTransactionCount: newCount,
     });
   } catch (error) {
@@ -226,13 +329,17 @@ router.post("/sync/:cardId/reset", verifyToken, async (req, res) => {
 router.post("/sync/:cardId", verifyToken, async (req, res) => {
   try {
     const card = await Card.findById(req.params.cardId);
-    if (!card)                              return res.status(404).json({ message: "Card not found." });
-    if (card.userId.toString() !== req.user.id) return res.status(403).json({ message: "Unauthorized." });
-    if (!card.plaidItemId)                  return res.status(400).json({ message: "This card is not connected to Plaid." });
+    if (!card) return res.status(404).json({ message: "Card not found." });
+    if (card.userId.toString() !== req.user.id)
+      return res.status(403).json({ message: "Unauthorized." });
+    if (!card.plaidItemId)
+      return res
+        .status(400)
+        .json({ message: "This card is not connected to Plaid." });
 
     const newCount = await syncCardTransactions(card);
     res.status(200).json({
-      message:             `Sync complete. ${newCount} new transaction${newCount !== 1 ? "s" : ""} imported.`,
+      message: `Sync complete. ${newCount} new transaction${newCount !== 1 ? "s" : ""} imported.`,
       newTransactionCount: newCount,
     });
   } catch (error) {
@@ -246,13 +353,16 @@ router.post("/webhook", async (req, res) => {
   const { webhook_type, webhook_code, item_id } = req.body;
   if (
     webhook_type === "TRANSACTIONS" &&
-    (webhook_code === "SYNC_UPDATES_AVAILABLE" || webhook_code === "DEFAULT_UPDATE")
+    (webhook_code === "SYNC_UPDATES_AVAILABLE" ||
+      webhook_code === "DEFAULT_UPDATE")
   ) {
     try {
       const card = await Card.findOne({ plaidItemId: item_id });
       if (!card) return;
       const newCount = await syncCardTransactions(card);
-      console.log(`Webhook sync for item ${item_id}: ${newCount} new transactions.`);
+      console.log(
+        `Webhook sync for item ${item_id}: ${newCount} new transactions.`,
+      );
     } catch (err) {
       console.error("Webhook sync error:", err.message);
     }
@@ -261,9 +371,12 @@ router.post("/webhook", async (req, res) => {
 
 router.post("/sandbox/fire/:cardId", verifyToken, async (req, res) => {
   try {
-    const card = await Card.findById(req.params.cardId).select("+plaidAccessToken");
-    if (!card)                                  return res.status(404).json({ message: "Card not found." });
-    if (card.userId.toString() !== req.user.id) return res.status(403).json({ message: "Unauthorized." });
+    const card = await Card.findById(req.params.cardId).select(
+      "+plaidAccessToken",
+    );
+    if (!card) return res.status(404).json({ message: "Card not found." });
+    if (card.userId.toString() !== req.user.id)
+      return res.status(403).json({ message: "Unauthorized." });
 
     await plaidClient.sandboxItemFireWebhook({
       access_token: card.plaidAccessToken,
@@ -272,7 +385,9 @@ router.post("/sandbox/fire/:cardId", verifyToken, async (req, res) => {
     res.status(200).json({ message: "Sandbox webhook fired." });
   } catch (err) {
     console.error("Sandbox fire error:", err.response?.data || err.message);
-    res.status(500).json({ message: err.response?.data?.error_message || err.message });
+    res
+      .status(500)
+      .json({ message: err.response?.data?.error_message || err.message });
   }
 });
 

@@ -1,9 +1,13 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { usePlaidLink } from "react-plaid-link";
 import { useNavigate } from "react-router-dom";
 import api from "../../utils/api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faLink, faSpinner, faCheckCircle } from "@fortawesome/free-solid-svg-icons";
+import {
+  faLink,
+  faSpinner,
+  faCheckCircle,
+} from "@fortawesome/free-solid-svg-icons";
 import styles from "./Setup.module.css";
 
 export default function Setup() {
@@ -15,6 +19,8 @@ export default function Setup() {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [connectedCardsCount, setConnectedCardsCount] = useState(0);
+  const [pendingOpen, setPendingOpen] = useState(false);
+  const tokenFetchInProgress = useRef(false);
 
   // Fetch initial card count to show if user already has connected cards
   useEffect(() => {
@@ -46,64 +52,74 @@ export default function Setup() {
     }
   }, []);
 
-  const tokenFetchInProgress = { current: false };
-
-  const onPlaidSuccess = useCallback(async (public_token, metadata) => {
-    setSaving(true);
-    setError(null);
-    try {
-      // Random color selection
-      const colors = [
-        { color: "slate", colorFrom: "#64748b", colorTo: "#475569" },
-        { color: "emerald", colorFrom: "#34d399", colorTo: "#10b981" },
-        { color: "rose", colorFrom: "#f43f5e", colorTo: "#e11d48" },
-        { color: "amber", colorFrom: "#fbbf24", colorTo: "#d97706" },
-        { color: "violet", colorFrom: "#a78bfa", colorTo: "#8b5cf6" },
-        { color: "indigo", colorFrom: "#818cf8", colorTo: "#6366f1" },
-      ];
-      const randomColor = colors[Math.floor(Math.random() * colors.length)];
-
-      await api.post("/plaid/exchange", {
-        publicToken: public_token,
-        metadata,
-        ...randomColor,
-      });
-
-      // Mark setup as complete (optional but nice)
+  const onPlaidSuccess = useCallback(
+    async (public_token, metadata) => {
+      setSaving(true);
+      setError(null);
       try {
-        await api.patch("/auth/setup-complete");
-      } catch (e) {
-        console.error("Failed to mark setup complete:", e);
+        // Random color selection
+        const colors = [
+          { color: "slate", colorFrom: "#64748b", colorTo: "#475569" },
+          { color: "emerald", colorFrom: "#34d399", colorTo: "#10b981" },
+          { color: "rose", colorFrom: "#f43f5e", colorTo: "#e11d48" },
+          { color: "amber", colorFrom: "#fbbf24", colorTo: "#d97706" },
+          { color: "violet", colorFrom: "#a78bfa", colorTo: "#8b5cf6" },
+          { color: "indigo", colorFrom: "#818cf8", colorTo: "#6366f1" },
+        ];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
+        await api.post("/plaid/exchange", {
+          publicToken: public_token,
+          metadata,
+          ...randomColor,
+        });
+
+        // Mark setup as complete (optional but nice)
+        try {
+          await api.patch("/auth/setup-complete");
+        } catch (e) {
+          console.error("Failed to mark setup complete:", e);
+        }
+
+        setSuccess(true);
+        // Refresh card count
+        fetchCardsCount();
+
+        // Redirect after short delay
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 2000);
+      } catch (err) {
+        setError(
+          err.response?.data?.message ||
+            "Failed to connect bank. Please try again.",
+        );
+      } finally {
+        setSaving(false);
       }
-
-      setSuccess(true);
-      // Refresh card count
-      fetchCardsCount();
-
-      // Redirect after short delay
-      setTimeout(() => {
-        navigate("/dashboard");
-      }, 2000);
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to connect bank. Please try again.");
-    } finally {
-      setSaving(false);
-    }
-  }, [navigate]);
+    },
+    [navigate],
+  );
 
   const { open: openPlaidLink, ready: plaidReady } = usePlaidLink({
     token: linkToken,
     onSuccess: onPlaidSuccess,
     onExit: (err) => {
-      if (err) console.error('Plaid Link exit with error:', err);
+      if (err) console.error("Plaid Link exit with error:", err);
     },
   });
 
-  const handleConnectBank = async () => {
-    await fetchLinkToken();
-    if (linkToken && plaidReady) {
+  // Open Plaid as soon as we have a token and Plaid is ready
+  useEffect(() => {
+    if (pendingOpen && linkToken && plaidReady) {
+      setPendingOpen(false);
       openPlaidLink();
     }
+  }, [pendingOpen, linkToken, plaidReady, openPlaidLink]);
+
+  const handleConnectBank = async () => {
+    setPendingOpen(true);
+    await fetchLinkToken();
   };
 
   const handleSkip = () => {
@@ -130,7 +146,10 @@ export default function Setup() {
         <div className={styles.content}>
           {success ? (
             <div className={styles.successMessage}>
-              <FontAwesomeIcon icon={faCheckCircle} className={styles.successIcon} />
+              <FontAwesomeIcon
+                icon={faCheckCircle}
+                className={styles.successIcon}
+              />
               <h3>Bank connected successfully!</h3>
               <p>Redirecting to dashboard...</p>
             </div>
