@@ -1,22 +1,17 @@
-import { Resend } from 'resend';
+import { Resend } from "resend";
 import dotenv from "dotenv";
 
 dotenv.config();
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-/**
- * Sends a verification email to the user using Resend
- * @param {Object} user - User document with email, firstName, lastName
- * @param {string} verificationToken - The verification token
- */
 export async function sendVerificationEmail(user, verificationToken) {
   const verificationUrl = `${process.env.FRONTEND_URL}/verify-email?token=${verificationToken}`;
 
   const { data, error } = await resend.emails.send({
-    from: process.env.RESEND_FROM_EMAIL || 'Finely <noreply@resend.dev>',
+    from: process.env.RESEND_FROM_EMAIL || "Finely <noreply@resend.dev>",
     to: [user.email],
-    subject: 'Verify your email address',
+    subject: "Verify your email address",
     html: `
       <!DOCTYPE html>
       <html>
@@ -40,7 +35,7 @@ export async function sendVerificationEmail(user, verificationToken) {
               <h2>Finely</h2>
             </div>
             <h1>Verify your email address</h1>
-            <p>Hello ${user.firstName || 'there'},</p>
+            <p>Hello ${user.firstName || "there"},</p>
             <p>Thanks for signing up! Please verify your email address to activate your account.</p>
             <p style="text-align: center; margin: 30px 0;">
               <a href="${verificationUrl}" class="button">Verify Email</a>
@@ -59,7 +54,7 @@ export async function sendVerificationEmail(user, verificationToken) {
   });
 
   if (error) {
-    console.error('Failed to send verification email:', error);
+    console.error("Failed to send verification email:", error);
     throw error;
   }
 

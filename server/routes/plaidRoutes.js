@@ -150,13 +150,12 @@ async function syncCardTransactions(card) {
   let removed = [];
   let hasMore = true;
 
-  // FIXED: Loop runs as long as Plaid indicates more data is available
   while (hasMore) {
     try {
       const response = await plaidClient.transactionsSync({
         access_token: fullCard.plaidAccessToken,
         cursor,
-        count: 500, // Increased count to fetch more per request
+        count: 500,
       });
 
       const addedTx = Array.isArray(response.data.added)
@@ -169,8 +168,8 @@ async function syncCardTransactions(card) {
       added = added.concat(addedTx);
       removed = removed.concat(removedTx);
 
-      hasMore = response.data.has_more; // Keep looping if true
-      cursor = response.data.next_cursor; // Update cursor for the next iteration
+      hasMore = response.data.has_more;
+      cursor = response.data.next_cursor;
     } catch (err) {
       console.error("Error in transactionsSync call:", err);
       break;
@@ -200,7 +199,6 @@ async function syncCardTransactions(card) {
     await Transaction.deleteMany({ plaidTransactionId: { $in: removedIds } });
   }
 
-  // Save the latest cursor so the next sync starts where we left off
   await Card.findByIdAndUpdate(fullCard._id, { plaidCursor: cursor });
   return newCount;
 }
@@ -279,7 +277,6 @@ router.post("/exchange", verifyToken, async (req, res) => {
 
     const saved = await card.save();
 
-    // Initial sync now uses the updated logic to fetch all pages
     try {
       await syncCardTransactions(saved);
     } catch (syncErr) {

@@ -22,7 +22,6 @@ export default function Setup() {
   const [pendingOpen, setPendingOpen] = useState(false);
   const tokenFetchInProgress = useRef(false);
 
-  // Fetch initial card count to show if user already has connected cards
   useEffect(() => {
     fetchCardsCount();
   }, []);
@@ -57,7 +56,6 @@ export default function Setup() {
       setSaving(true);
       setError(null);
       try {
-        // Random color selection
         const colors = [
           { color: "slate", colorFrom: "#64748b", colorTo: "#475569" },
           { color: "emerald", colorFrom: "#34d399", colorTo: "#10b981" },
@@ -74,7 +72,6 @@ export default function Setup() {
           ...randomColor,
         });
 
-        // Mark setup as complete (optional but nice)
         try {
           await api.patch("/auth/setup-complete");
         } catch (e) {
@@ -82,10 +79,8 @@ export default function Setup() {
         }
 
         setSuccess(true);
-        // Refresh card count
         fetchCardsCount();
 
-        // Redirect after short delay
         setTimeout(() => {
           navigate("/dashboard");
         }, 2000);
@@ -109,7 +104,6 @@ export default function Setup() {
     },
   });
 
-  // Open Plaid as soon as we have a token and Plaid is ready
   useEffect(() => {
     if (pendingOpen && linkToken && plaidReady) {
       setPendingOpen(false);

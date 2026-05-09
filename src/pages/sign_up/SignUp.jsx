@@ -100,11 +100,9 @@ export default function SignUp() {
         const { token } = response.data;
         localStorage.setItem("token", token);
 
-        // Fetch user profile (Google users are automatically verified)
         const { data: user } = await api.get("/auth/me");
         localStorage.setItem("finely-user", JSON.stringify(user));
 
-        // Redirect to setup page
         navigate("/setup");
       } catch (err) {
         setModal({

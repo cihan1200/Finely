@@ -21,8 +21,6 @@ const transactionSchema = new mongoose.Schema(
 
     plaidTransactionId: {
       type: String,
-      // FIX: Removed 'default: null'.
-      // If left undefined, the 'sparse' index correctly ignores it for manual transactions.
     },
 
     cardId: {

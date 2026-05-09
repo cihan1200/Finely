@@ -83,7 +83,6 @@ export default function SignIn() {
         const { token } = response.data;
         localStorage.setItem("token", token);
 
-        // Fetch user profile
         const { data: user } = await api.get("/auth/me");
         localStorage.setItem("finely-user", JSON.stringify(user));
 

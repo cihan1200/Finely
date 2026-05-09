@@ -1,23 +1,26 @@
 import { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEnvelope, faSpinner, faCheckCircle, faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEnvelope,
+  faSpinner,
+  faCheckCircle,
+  faExclamationCircle,
+} from "@fortawesome/free-solid-svg-icons";
 import api from "../../utils/api";
 import { useNavigate } from "react-router-dom";
 import styles from "./VerifyEmail.module.css";
 
 export default function VerifyEmail() {
-  const [status, setStatus] = useState("checking"); // checking, sent, verified, error
+  const [status, setStatus] = useState("checking");
   const [resendCooldown, setResendCooldown] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check URL for token first (if user clicked verification link)
     const token = new URLSearchParams(window.location.search).get("token");
     if (token) {
       verifyEmail(token);
       return;
     }
-    // If no token, check verification status
     checkVerificationStatus();
   }, []);
 
@@ -32,11 +35,10 @@ export default function VerifyEmail() {
       }
     } catch (err) {
       if (err.response?.status === 401 || err.response?.status === 403) {
-        // Not authenticated, redirect to signin
         navigate("/signin");
         return;
       }
-      setStatus("sent"); // Assume not verified yet
+      setStatus("sent");
     }
   };
 
@@ -44,7 +46,6 @@ export default function VerifyEmail() {
     try {
       const { data } = await api.get(`/auth/verify-email/${token}`);
 
-      // Store token and user data for auto-login
       localStorage.setItem("token", data.token);
       localStorage.setItem("finely-user", JSON.stringify(data.user));
 
@@ -65,7 +66,7 @@ export default function VerifyEmail() {
       setStatus("sent");
       setResendCooldown(60);
       const countdown = setInterval(() => {
-        setResendCooldown(prev => {
+        setResendCooldown((prev) => {
           if (prev <= 1) {
             clearInterval(countdown);
             return 0;
@@ -97,14 +98,16 @@ export default function VerifyEmail() {
             </div>
             <h2>Check your inbox</h2>
             <p>
-              We've sent a verification email to your email address.
-              Please click the link in that email to verify your account.
+              We've sent a verification email to your email address. Please
+              click the link in that email to verify your account.
             </p>
             <div className={styles.actions}>
               <button
                 onClick={handleResend}
                 disabled={resendCooldown > 0}
-                className={resendCooldown > 0 ? styles.disabled : styles.resendBtn}
+                className={
+                  resendCooldown > 0 ? styles.disabled : styles.resendBtn
+                }
               >
                 {resendCooldown > 0
                   ? `Resend in ${resendCooldown}s`

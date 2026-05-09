@@ -11,9 +11,6 @@ const MAX_LIMIT = 999_999;
 router.get("/", verifyToken, async (req, res) => {
   try {
     const budgets = await Budget.find({ userId: req.user.id });
-
-    // FIX: Removed the monthStart/monthEnd filters so historical
-    // synced Plaid transactions accurately aggregate into the budgets.
     const spentByCategory = await Transaction.aggregate([
       {
         $match: {
@@ -23,7 +20,6 @@ router.get("/", verifyToken, async (req, res) => {
       },
       {
         $group: {
-          // FIX: Convert all categories to lowercase to prevent "Food" vs "food" mapping failures
           _id: { $toLower: "$category" },
           total: { $sum: "$amount" },
         },
@@ -42,7 +38,6 @@ router.get("/", verifyToken, async (req, res) => {
       icon: b.icon,
       color: b.color,
       limit: b.limit,
-      // Ensure we check against the lowercase version of the budget's category
       spent: spentMap[(b.category || "").toLowerCase()] ?? 0,
     }));
 
@@ -71,11 +66,9 @@ router.post("/", verifyToken, async (req, res) => {
       Number(limit) <= 0 ||
       Number(limit) > MAX_LIMIT
     ) {
-      return res
-        .status(400)
-        .json({
-          message: `Limit must be between $1 and $${MAX_LIMIT.toLocaleString()}.`,
-        });
+      return res.status(400).json({
+        message: `Limit must be between $1 and $${MAX_LIMIT.toLocaleString()}.`,
+      });
     }
 
     const budget = new Budget({
@@ -120,11 +113,9 @@ router.put("/:id", verifyToken, async (req, res) => {
       Number(limit) <= 0 ||
       Number(limit) > MAX_LIMIT
     ) {
-      return res
-        .status(400)
-        .json({
-          message: `Limit must be between $1 and $${MAX_LIMIT.toLocaleString()}.`,
-        });
+      return res.status(400).json({
+        message: `Limit must be between $1 and $${MAX_LIMIT.toLocaleString()}.`,
+      });
     }
 
     budget.limit = Number(limit);

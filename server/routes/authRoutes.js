@@ -8,7 +8,6 @@ dotenv.config();
 
 const router = express.Router();
 
-// POST /auth/signup - Email/Password registration
 router.post("/signup", async (req, res) => {
   try {
     const { email, password, firstName, lastName } = req.body;
@@ -47,7 +46,6 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-// POST /auth/signin - Email/Password login
 router.post("/signin", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -81,7 +79,6 @@ router.post("/signin", async (req, res) => {
   }
 });
 
-// POST /auth/google - Google OAuth
 router.post("/google", async (req, res) => {
   try {
     const { access_token } = req.body;
@@ -130,11 +127,8 @@ router.post("/google", async (req, res) => {
   }
 });
 
-// GET /auth/me - Get current user profile
 router.get("/me", async (req, res) => {
   try {
-    // This route is protected by verifyToken middleware (to be added)
-    // Will be handled by ProtectedRoute in the app - but we can add a simple check
     let token = req.header("Authorization");
 
     if (!token) {
@@ -170,7 +164,6 @@ router.get("/me", async (req, res) => {
   }
 });
 
-// PATCH /auth/setup-complete - Mark setup as complete
 router.patch("/setup-complete", async (req, res) => {
   try {
     let token = req.header("Authorization");
